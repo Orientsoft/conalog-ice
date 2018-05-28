@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Dialog, Grid, Input, Button, Field, Form } from '@icedesign/base';
+import { Dialog, Grid, Input, Button, Field, Form, Select } from '@icedesign/base';
 import IceContainer from '@icedesign/container';
 import {
   FormBinderWrapper as IceFormBinderWrapper,
@@ -215,9 +215,8 @@ const { Item: FormItem } = Form;
 // }
 
 const defaultValue = {
-  username: '',
-  password: '',
-  rePasswd: '',
+  name: '',
+  type: null,
 };
 
 export default class SimpleFormDialog extends Component {
@@ -225,33 +224,15 @@ export default class SimpleFormDialog extends Component {
     super(props);
     this.field = new Field(this);
     this.state = {
-      value: defaultValue,
+      value: this.props.data || defaultValue,
     };
   }
 
   componentWillMount() {
     this.field.setValues({
-      username: this.state.value.username,
-      password: '',
-      rePasswd: '',
+      name: this.state.value.name,
+      type: this.state.value.type,
     });
-  }
-
-  checkPass(rule, value, callback) {
-    const { validate } = this.field;
-    if (value) {
-      validate(['rePasswd']);
-    }
-    callback();
-  }
-
-  checkPass2(rule, value, callback) {
-    const { getValue } = this.field;
-    if (value && value !== getValue('password')) {
-      callback('两次输入密码不一致！');
-    } else {
-      callback();
-    }
   }
 
   onOk = () => {
@@ -261,26 +242,11 @@ export default class SimpleFormDialog extends Component {
         return;
       }
       const data = {
-        username: values.username,
-        password: CryptoJS.SHA256(values.password).toString(),
+        name: values.name,
+        type: values.type,
       };
-      console.log(data);
-      this.props.onOk();
+      this.props.onOk(data);
     });
-    // const password = this.state.value.password;
-    // if (password) {
-    //   this.state.value.password = CryptoJS.SHA256(password).toString();
-    // }
-    // console.log('value', this.state.value);
-    // this.refForm.validateAll((error) => {
-    //   if (error) {
-    //     // show validate error
-    //     return;
-    //   }
-    //   // deal with value
-
-    //   this.hideDialog();
-    // });
   };
 
   render() {
@@ -297,64 +263,49 @@ export default class SimpleFormDialog extends Component {
       },
     };
     return (
-      
-        <Dialog
-          className="simple-form-dialog"
-          style={simpleFormDialog}
-          autoFocus={false}
-          footerAlign="center"
-          title="添加"
-          {...this.props}
-          onOk={this.onOk}
-          onCancel={this.props.onCancel}
-          onClose={this.props.onCancel}
-          isFullScreen
-          visible
-        >
-          <Form field={this.field}>
-            <FormItem label="用户名：" {...formItemLayout} hasFeedback >
-              <Input
-                hasLimitHint
-                {...init('username', {
-                  rules: [
-                    { required: true, trigger: 'onBlur', message: '请填写用户名' },
-                  ],
-                })}
-              />
-            </FormItem>
 
-            <FormItem label="密码：" {...formItemLayout} hasFeedback>
-              <Input
-                htmlType="password"
-                {...init('password', {
-                  rules: [
-                    { required: true, min: 1, message: '请填写密码' },
-                    { validator: this.checkPass.bind(this) },
-                  ],
-                })}
-              />
-            </FormItem>
+      <Dialog
+        className="simple-form-dialog"
+        style={simpleFormDialog}
+        autoFocus={false}
+        footerAlign="center"
+        title="添加"
+        {...this.props}
+        onOk={this.onOk}
+        onCancel={this.props.onCancel}
+        onClose={this.props.onCancel}
+        isFullScreen
+        visible
+      >
+        <Form field={this.field}>
+          <FormItem label="名字：" {...formItemLayout} hasFeedback >
+            <Input
+              hasLimitHint
+              {...init('name', {
+                rules: [
+                  { required: true, trigger: 'onBlur', message: '请填写组名' },
+                ],
+              })}
+            />
+          </FormItem>
 
-            <FormItem label="确认密码：" {...formItemLayout} hasFeedback>
-              <Input
-                htmlType="rePasswd"
-                placeholder="两次输入密码保持一致"
-                {...init('rePasswd', {
-                  rules: [
-                    {
-                      required: true,
-                      message: '请再次输入密码',
-                      min: 1,
-                    },
-                    {
-                      validator: this.checkPass2.bind(this),
-                    },
-                  ],
-                })}
-              />
-            </FormItem>
-          </Form>
-        </Dialog>
+          <FormItem label="类型：" {...formItemLayout} hasFeedback>
+            <Select
+              style={{ width: '100%' }}
+              htmlType="type"
+              {...init('type', {
+                rules: [
+                  { required: true, message: '请选择分组' },
+                ],
+              })}
+            >
+              <li value={0}>CERT</li>
+              <li value={1}>COLLECTOR</li>
+              <li value={2}>PARSER</li>
+            </Select>
+          </FormItem>
+        </Form>
+      </Dialog>
     );
   }
 }
