@@ -5,6 +5,17 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+ # dependencies
+ /node_modules
+  
+ # production
+ /build
+ /dist
+ 
+ # misc
+.idea/
+.happypack
+.DS_Store
 # Runtime data
 pids
 *.pid
