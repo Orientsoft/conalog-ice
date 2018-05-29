@@ -145,7 +145,12 @@ export default class SimpleTable extends Component {
             });
           })
           .catch((error) => {
-            console.log(error);
+            Dialog.alert({
+              title: 'alert',
+              content: error.response.data,
+              onOk: () => { },
+            });
+            // console.log(error);
             // Message.error(error)
           });
       },
@@ -177,6 +182,11 @@ export default class SimpleTable extends Component {
         });
       })
       .catch((error) => {
+        Dialog.alert({
+          title: 'alert',
+          content: error.response.data,
+          onOk: () => { },
+        });
         console.log(error);
         // Message.error(error)
       });
@@ -189,7 +199,6 @@ export default class SimpleTable extends Component {
   };
 
   onEditOk = (data) => {
-    console.log('edit', data)
     let id = this.state.choosedUser._id
     const that = this;
     const url = conalogUrl + '/groups/' + id
@@ -203,7 +212,12 @@ export default class SimpleTable extends Component {
         });
       })
       .catch((error) => {
-        console.log(error);
+        Dialog.alert({
+          title: 'alert',
+          content: error.response.data,
+          onOk: () => { },
+        });
+        // console.log(error);
       });
   };
 

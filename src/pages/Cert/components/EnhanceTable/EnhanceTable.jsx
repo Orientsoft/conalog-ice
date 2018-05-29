@@ -14,7 +14,6 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
 
 @DataBinder({
   tableData: {
-    // 详细请求配置请参见 https://github.com/axios/axios
     url: conalogUrl + '/certs',
     method: 'get',
     responseFormatter: (responseHandler, res, originResponse) => {
@@ -73,8 +72,11 @@ export default class EnhanceTable extends Component {
         });
       })
       .catch((error) => {
-        console.log(error);
-        // Message.error(error)
+        Dialog.alert({
+          title: 'alert',
+          content: error.response.data,
+          onOk: () => { },
+        });
       });
     this.queryCache.page = 1;
     this.fetchData();
@@ -117,8 +119,11 @@ export default class EnhanceTable extends Component {
             });
           })
           .catch((error) => {
-            console.log(error);
-            // Message.error(error)
+            Dialog.alert({
+              title: 'alert',
+              content: error.response.data,
+              onOk: () => { },
+            });
           });
       },
     });
@@ -126,7 +131,6 @@ export default class EnhanceTable extends Component {
 
   testConnect = (record) => {
     let id = record._id;
-    const that = this;
     const url = conalogUrl + '/certs/' + id + '/test'
     axios.get(url)
       .then((response) => {
@@ -137,14 +141,12 @@ export default class EnhanceTable extends Component {
         });
       })
       .catch((error) => {
-        Dialog.confirm({
-          title: '测试',
+        Dialog.alert({
+          title: 'alert',
           content: error.response.data,
           onOk: () => { },
         });
-        // Message.error(error)
       });
-
   };
 
   renderOperations = (value, index, record) => {
@@ -186,26 +188,6 @@ export default class EnhanceTable extends Component {
     this.fetchData();
   };
 
-  // onTabChange = (tabKey) => {
-  //   this.setState({
-  //     activeKey: tabKey,
-  //   });
-  //   this.queryCache.activeKey = tabKey;
-
-  //   if (tabKey === 'solved') {
-  //     this.fetchData();
-  //   } else if (tabKey === 'needFix') {
-  //     this.fetchData();
-  //   } else {
-  //     console.log(`你点击了 ${tabKey}`);
-  //   }
-  // };
-
-  onSearch = (value) => {
-    this.queryCache.keywords = value.key;
-    this.fetchData();
-  };
-
   onShowModal = () => {
     this.setState({
       addVisible: true,
@@ -225,8 +207,11 @@ export default class EnhanceTable extends Component {
         });
       })
       .catch((error) => {
-        console.log(error);
-        // Message.error(error)
+        Dialog.alert({
+          title: 'alert',
+          content: error.response.data,
+          onOk: () => { },
+        });
       });
   };
 
@@ -237,7 +222,6 @@ export default class EnhanceTable extends Component {
   };
 
   onEditOk = (data) => {
-    console.log('edit', data)
     let id = this.state.choosedcert._id
     const that = this;
     const url = conalogUrl + '/certs/' + id
@@ -251,7 +235,11 @@ export default class EnhanceTable extends Component {
         });
       })
       .catch((error) => {
-        console.log(error);
+        Dialog.alert({
+          title: 'alert',
+          content: error.response.data,
+          onOk: () => { },
+        });
       });
   };
 
@@ -268,10 +256,10 @@ export default class EnhanceTable extends Component {
         <IceContainer style={styles.card}>
           <div>
             <Button type="primary" onClick={this.onShowModal}>
-              添加 Cert
+              添加认证
             </Button>
           </div>
-          <div style={styles.extraFilter}>
+          {/* <div style={styles.extraFilter}>
             <Search
               style={styles.search}
               type="primary"
@@ -280,7 +268,7 @@ export default class EnhanceTable extends Component {
               searchText=""
               onSearch={this.onSearch}
             />
-          </div>
+          </div> */}
         </IceContainer>
         <IceContainer>
           <Table

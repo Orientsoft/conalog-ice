@@ -130,7 +130,11 @@ export default class SimpleTable extends Component {
             });
           })
           .catch((error) => {
-            console.log(error);
+            Dialog.alert({
+              title: 'alert',
+              content: error.response.data,
+              onOk: () => { },
+            });
             // Message.error(error)
           });
       }
@@ -168,21 +172,26 @@ export default class SimpleTable extends Component {
         that.fetchData({
           page: 1,
         });
+        this.setState({
+          addVisible: false,
+        });
       })
       .catch((error) => {
-        console.log(error);
+        Dialog.alert({
+          title: 'alert',
+          content: error.response.data,
+          onOk: () => { },
+        });
         // Message.error(error)
       });
+  };
 
-    this.setState({
-      addVisible: false,
-    });
-  }
   _onAddCancel = () => {
     this.setState({
       addVisible: false,
     });
-  }
+  };
+
   _onEditOk = (data) => {
     let id = this.state.choosedUser._id
     const that = this;
@@ -197,9 +206,14 @@ export default class SimpleTable extends Component {
         });
       })
       .catch((error) => {
-        console.log(error);
+        Dialog.alert({
+          title: 'alert',
+          content: error.response.data,
+          onOk: () => { },
+        });
       });
-  }
+  };
+
   _onEditCancel = () => {
     this.setState({
       editVisible: false,

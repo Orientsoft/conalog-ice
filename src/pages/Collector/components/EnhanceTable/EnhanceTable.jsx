@@ -155,7 +155,7 @@ export default class EnhanceTable extends Component {
         <IceContainer style={styles.card}>
           <div>
             <Button onClick={this.onShowModal}>
-              添加 activeCollector
+              添加
             </Button>
           </div>
           <div style={styles.extraFilter}>
