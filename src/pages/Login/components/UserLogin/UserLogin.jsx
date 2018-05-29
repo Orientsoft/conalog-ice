@@ -1,7 +1,7 @@
 /* eslint react/no-string-refs:0 */
 import React, { Component } from 'react';
 import { hashHistory, Link } from 'react-router';
-import { Input, Button, Checkbox, Grid, } from '@icedesign/base';
+import { Input, Button, Checkbox, Grid, Dialog } from '@icedesign/base';
 import {
   FormBinderWrapper as IceFormBinderWrapper,
   FormBinder as IceFormBinder,
@@ -52,20 +52,23 @@ export default class UserLogin extends Component {
         return;
       }
       const username = this.state.value.account;
-      const password = this.state.value.password;
-      // const password = CryptoJS.SHA256(this.state.value.password).toString();
+      // const password = this.state.value.password;
+      const password = CryptoJS.SHA256(this.state.value.password).toString();
       let data = {
         username,
         password,
       };
       const url = conalogUrl + '/users/login'
       axios.post(url, data)
-        .then(function (response) {
-          console.log(response);
+        .then((response) => {
           hashHistory.push('/home');
         })
-        .catch(function (error) {
-          console.log(error);
+        .catch((error) => {
+          Dialog.confirm({
+            title: '测试',
+            content: error.response.data.message,
+            onOk: () => { },
+          });
           // Message.error(error)
         });
     });

@@ -132,12 +132,11 @@ export default class EnhanceTable extends Component {
       .then((response) => {
         Dialog.confirm({
           title: '测试',
-          content: '测试成功',
+          content: response.statusText,
           onOk: () => { },
         });
       })
       .catch((error) => {
-        console.log(error)
         Dialog.confirm({
           title: '测试',
           content: error.response.data,
