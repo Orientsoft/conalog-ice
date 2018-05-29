@@ -28,7 +28,7 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
         data: {
           total: res.meta.totalCount,
           pageSize: res.meta.pageSize,
-          currentPage: res.meta.pageCount,
+          currentPage: res.meta.page + 1,
           list,
         },
       };
@@ -62,15 +62,13 @@ export default class SimpleTable extends Component {
   componentDidMount() {
     // this.enquireScreenRegister();
     this.fetchData({
-      page: 1,
+      page: 0,
     });
   }
 
-  fetchData = ({ page }) => {
+  fetchData = (page) => {
     this.props.updateBindingData('tableData', {
-      data: {
-        page,
-      },
+      params: page,
     });
   };
 
@@ -141,7 +139,7 @@ export default class SimpleTable extends Component {
         axios.delete(url)
           .then((response) => {
             that.fetchData({
-              page: 1,
+              page: 0,
             });
           })
           .catch((error) => {
@@ -150,8 +148,6 @@ export default class SimpleTable extends Component {
               content: error.response.data.message ? error.response.data.message : error.response.data,
               onOk: () => { },
             });
-            // console.log(error);
-            // Message.error(error)
           });
       },
     });
@@ -159,7 +155,7 @@ export default class SimpleTable extends Component {
 
   changePage = (currentPage) => {
     this.fetchData({
-      page: currentPage,
+      page: currentPage - 1,
     });
   };
 
@@ -178,7 +174,7 @@ export default class SimpleTable extends Component {
           addVisible: false,
         });
         that.fetchData({
-          page: 1,
+          page: 0,
         });
       })
       .catch((error) => {
@@ -206,7 +202,7 @@ export default class SimpleTable extends Component {
           editVisible: false,
         });
         that.fetchData({
-          page: 1,
+          page: 0,
         });
       })
       .catch((error) => {

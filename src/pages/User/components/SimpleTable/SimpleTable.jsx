@@ -28,7 +28,7 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
         data: {
           total: res.meta.totalCount,
           pageSize: res.meta.pageSize,
-          currentPage: res.meta.pageCount,
+          currentPage: res.meta.page + 1,
           list,
         },
       };
@@ -62,23 +62,13 @@ export default class SimpleTable extends Component {
   componentDidMount() {
     // this.enquireScreenRegister();
     this.fetchData({
-      page: 1,
+      page: 0,
     });
   }
 
-  // enquireScreenRegister = () => {
-  //   const mediaCondition = 'only screen and (max-width: 720px)';
-
-  //   enquireScreen((mobile) => {
-  //     this.setState({
-  //       isMobile: mobile,
-  //     });
-  //   }, mediaCondition);
-  // };
-
   fetchData = ({ page }) => {
     this.props.updateBindingData('tableData', {
-      data: {
+      params: {
         page,
       },
     });
@@ -126,7 +116,7 @@ export default class SimpleTable extends Component {
         axios.delete(url)
           .then((response) => {
             that.fetchData({
-              page: 1,
+              page: 0,
             });
           })
           .catch((error) => {
@@ -135,9 +125,8 @@ export default class SimpleTable extends Component {
               content: error.response.data.message ? error.response.data.message : error.response.data,
               onOk: () => { },
             });
-            // Message.error(error)
           });
-      }
+      },
     });
   };
 
@@ -156,7 +145,7 @@ export default class SimpleTable extends Component {
 
   changePage = (currentPage) => {
     this.fetchData({
-      page: currentPage,
+      page: currentPage - 1,
     });
   };
   showAddModal = () => {
@@ -164,13 +153,13 @@ export default class SimpleTable extends Component {
       addVisible: true,
     });
   }
-  _onAddOk = (data) => {
+  onAddOk = (data) => {
     const that = this;
     const url = conalogUrl + '/users'
     axios.post(url, data)
       .then((response) => {
         that.fetchData({
-          page: 1,
+          page: 0,
         });
         this.setState({
           addVisible: false,
@@ -182,17 +171,16 @@ export default class SimpleTable extends Component {
           content: error.response.data.message ? error.response.data.message : error.response.data,
           onOk: () => { },
         });
-        // Message.error(error)
       });
   };
 
-  _onAddCancel = () => {
+  onAddCancel = () => {
     this.setState({
       addVisible: false,
     });
   };
 
-  _onEditOk = (data) => {
+  onEditOk = (data) => {
     let id = this.state.choosedUser._id
     const that = this;
     const url = conalogUrl + '/users/' + id
@@ -202,7 +190,7 @@ export default class SimpleTable extends Component {
           editVisible: false,
         });
         that.fetchData({
-          page: 1,
+          page: 0,
         });
       })
       .catch((error) => {
@@ -214,7 +202,7 @@ export default class SimpleTable extends Component {
       });
   };
 
-  _onEditCancel = () => {
+  onEditCancel = () => {
     this.setState({
       editVisible: false,
     });
@@ -275,8 +263,8 @@ export default class SimpleTable extends Component {
             />
           </div>
         </IceContainer>
-        {this.state.addVisible && <Modal onOk={this._onAddOk} onCancel={this._onAddCancel} />}
-        {this.state.editVisible && <Modal data={this.state.choosedUser} onOk={this._onEditOk} onCancel={this._onEditCancel} />}
+        {this.state.addVisible && <Modal onOk={this.onAddOk} onCancel={this.onAddCancel} />}
+        {this.state.editVisible && <Modal data={this.state.choosedUser} onOk={this.onEditOk} onCancel={this.onEditCancel} />}
       </div>
     );
   }

@@ -58,6 +58,7 @@ export default class UserLogin extends Component {
         username,
         password,
       };
+      console.log(password)
       const url = conalogUrl + '/users/login'
       axios.post(url, data)
         .then((response) => {
