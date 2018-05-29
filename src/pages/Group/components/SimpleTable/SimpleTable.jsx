@@ -66,16 +66,6 @@ export default class SimpleTable extends Component {
     });
   }
 
-  // enquireScreenRegister = () => {
-  //   const mediaCondition = 'only screen and (max-width: 720px)';
-
-  //   enquireScreen((mobile) => {
-  //     this.setState({
-  //       isMobile: mobile,
-  //     });
-  //   }, mediaCondition);
-  // };
-
   fetchData = ({ page }) => {
     this.props.updateBindingData('tableData', {
       data: {
@@ -179,6 +169,9 @@ export default class SimpleTable extends Component {
     const url = conalogUrl + '/groups'
     axios.post(url, data)
       .then((response) => {
+        this.setState({
+          addVisible: false,
+        });
         that.fetchData({
           page: 1,
         });
@@ -187,10 +180,6 @@ export default class SimpleTable extends Component {
         console.log(error);
         // Message.error(error)
       });
-
-    this.setState({
-      addVisible: false,
-    });
   };
 
   onAddCancel = () => {

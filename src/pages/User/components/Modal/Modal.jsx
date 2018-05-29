@@ -226,6 +226,7 @@ export default class SimpleFormDialog extends Component {
     this.field = new Field(this);
     this.state = {
       value: this.props.data || defaultValue,
+      title: this.props.data ? '修改' : '添加',
     };
   }
 
@@ -296,64 +297,64 @@ export default class SimpleFormDialog extends Component {
       },
     };
     return (
-      
-        <Dialog
-          className="simple-form-dialog"
-          style={simpleFormDialog}
-          autoFocus={false}
-          footerAlign="center"
-          title="添加"
-          {...this.props}
-          onOk={this.onOk}
-          onCancel={this.props.onCancel}
-          onClose={this.props.onCancel}
-          isFullScreen
-          visible
-        >
-          <Form field={this.field}>
-            <FormItem label="用户名：" {...formItemLayout} hasFeedback >
-              <Input
-                hasLimitHint
-                {...init('username', {
-                  rules: [
-                    { required: true, trigger: 'onBlur', message: '请填写用户名' },
-                  ],
-                })}
-              />
-            </FormItem>
 
-            <FormItem label="密码：" {...formItemLayout} hasFeedback>
-              <Input
-                htmlType="password"
-                {...init('password', {
-                  rules: [
-                    { required: true, min: 1, message: '请填写密码' },
-                    { validator: this.checkPass.bind(this) },
-                  ],
-                })}
-              />
-            </FormItem>
+      <Dialog
+        className="simple-form-dialog"
+        style={simpleFormDialog}
+        autoFocus={false}
+        footerAlign="center"
+        title={this.state.title}
+        {...this.props}
+        onOk={this.onOk}
+        onCancel={this.props.onCancel}
+        onClose={this.props.onCancel}
+        isFullScreen
+        visible
+      >
+        <Form field={this.field}>
+          <FormItem label="用户名：" {...formItemLayout} hasFeedback >
+            <Input
+              hasLimitHint
+              {...init('username', {
+                rules: [
+                  { required: true, trigger: 'onBlur', message: '请填写用户名' },
+                ],
+              })}
+            />
+          </FormItem>
 
-            <FormItem label="确认密码：" {...formItemLayout} hasFeedback>
-              <Input
-                htmlType="rePasswd"
-                placeholder="两次输入密码保持一致"
-                {...init('rePasswd', {
-                  rules: [
-                    {
-                      required: true,
-                      message: '请再次输入密码',
-                      min: 1,
-                    },
-                    {
-                      validator: this.checkPass2.bind(this),
-                    },
-                  ],
-                })}
-              />
-            </FormItem>
-          </Form>
-        </Dialog>
+          <FormItem label="密码：" {...formItemLayout} hasFeedback>
+            <Input
+              htmlType="password"
+              {...init('password', {
+                rules: [
+                  { required: true, min: 1, message: '请填写密码' },
+                  { validator: this.checkPass.bind(this) },
+                ],
+              })}
+            />
+          </FormItem>
+
+          <FormItem label="确认密码：" {...formItemLayout} hasFeedback>
+            <Input
+              htmlType="password"
+              placeholder="两次输入密码保持一致"
+              {...init('rePasswd', {
+                rules: [
+                  {
+                    required: true,
+                    message: '请再次输入密码',
+                    min: 1,
+                  },
+                  {
+                    validator: this.checkPass2.bind(this),
+                  },
+                ],
+              })}
+            />
+          </FormItem>
+        </Form>
+      </Dialog>
     );
   }
 }

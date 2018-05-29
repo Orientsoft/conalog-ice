@@ -7,212 +7,8 @@ import {
   FormError as IceFormError,
 } from '@icedesign/form-binder';
 // import { enquireScreen } from 'enquire-js';
-import CryptoJS from 'crypto-js';
-// import { Link } from 'react-router';
 
-// const { Row, Col } = Grid;
 const { Item: FormItem } = Form;
-
-// const defaultValue = {
-//   username: '',
-//   password: '',
-//   rePasswd: '',
-// };
-
-// export default class SimpleFormDialog extends Component {
-//   static displayName = 'SimpleFormDialog';
-
-//   constructor(props) {
-//     super(props);
-//     this.field = new Field(this);
-//     this.state = {
-//       visible: false,
-//       value: defaultValue,
-//       isMobile: false,
-//     };
-//   }
-
-//   componentDidMount() {
-//     this.enquireScreenRegister();
-//   }
-
-//   enquireScreenRegister = () => {
-//     const mediaCondition = 'only screen and (max-width: 720px)';
-
-//     enquireScreen((mobile) => {
-//       this.setState({
-//         isMobile: mobile,
-//       });
-//     }, mediaCondition);
-//   };
-
-//   showDialog = () => {
-//     this.setState({
-//       visible: true,
-//       value: {
-//         username: '',
-//         password: '',
-//         rePasswd: '',
-//       },
-//     });
-//   };
-
-//   hideDialog = () => {
-//     this.setState({
-//       visible: false,
-//       value: defaultValue,
-//     });
-//   };
-
-//   onOk = () => {
-//     const password = this.state.value.password;
-//     if (password) {
-//       this.state.value.password = CryptoJS.SHA256(password).toString();
-//     }
-//     console.log('value', this.state.value);
-//     this.refForm.validateAll((error) => {
-//       if (error) {
-//         // show validate error
-//         return;
-//       }
-//       // deal with value
-
-//       this.hideDialog();
-//     });
-//   };
-
-//   onFormChange = (value) => {
-//     this.setState({
-//       value,
-//     });
-//   };
-
-//   checkPass2 = (rule, value, callback) => {
-//     const { getValue } = this.field;
-//     console.log('value',value, this.state.value.password)
-//     if (value && value !== this.state.value.password) {
-//       callback('两次输入密码不一致！');
-//     } else {
-//       callback();
-//     }
-//   }
-
-//   render() {
-//     const { init } = this.field;
-//     const { isMobile } = this.state;
-//     const simpleFormDialog = {
-//       ...styles.simpleFormDialog,
-//     };
-//     // 响应式处理
-//     if (isMobile) {
-//       simpleFormDialog.width = '300px';
-//     }
-
-//     return (
-//       <IceContainer>
-//         <Dialog
-//           className="simple-form-dialog"
-//           style={simpleFormDialog}
-//           autoFocus={false}
-//           footerAlign="center"
-//           title="添加"
-//           {...this.props}
-//           onOk={this.onOk}
-//           onCancel={this.hideDialog}
-//           onClose={this.hideDialog}
-//           isFullScreen
-//           visible={this.state.visible}
-//         >
-//           <IceFormBinderWrapper
-//             ref={(ref) => {
-//               this.refForm = ref;
-//             }}
-//             value={this.state.value}
-//             onChange={this.onFormChange}
-//           >
-//             <div style={styles.dialogContent}>
-//               <Row style={styles.formRow}>
-//                 <Col span={`${isMobile ? '6' : '6'}`}>
-//                   <label style={styles.formLabel}>用户名:</label>
-//                 </Col>
-//                 <Col span={`${isMobile ? '18' : '14'}`}>
-//                   <IceFormBinder
-//                     required
-//                     message="当前字段必填"
-//                   >
-//                     <Input
-//                       name="username"
-//                       style={styles.input}
-//                     />
-//                   </IceFormBinder>
-//                   <IceFormError name="username" />
-//                 </Col>
-//               </Row>
-//               <Row style={styles.formRow}>
-//                 <Col span={`${isMobile ? '6' : '6'}`}>
-//                   <label style={styles.formLabel}>密码:</label>
-//                 </Col>
-//                 <Col span={`${isMobile ? '18' : '14'}`}>
-//                   <IceFormBinder
-//                     required
-//                     message="当前字段必填"
-//                   >
-//                     <Input
-//                       htmlType="password"
-//                       name="password"
-//                       style={styles.input}
-//                     />
-//                   </IceFormBinder>
-//                   <IceFormError name="password" />
-//                 </Col>
-//               </Row>
-//               <Row style={styles.formRow}>
-//                 <Col span={`${isMobile ? '6' : '6'}`}>
-//                   <label style={styles.formLabel}>确认密码:</label>
-//                 </Col>
-//                 <Col span={`${isMobile ? '18' : '14'}`}>
-//                   <IceFormBinder
-//                     required
-//                     message="当前字段必填"
-//                   >
-//                     <Input
-//                       htmlType="rePasswd"
-//                       name="rePasswd"
-//                       style={styles.input}
-//                       placeholder="两次输入密码保持一致"
-//                       {...init('rePasswd', {
-//                         rules: [
-//                           {
-//                             required: true,
-//                             whitespace: true,
-//                             message: '请再次输入密码',
-//                           },
-//                           {
-//                             validator: this.checkPass2.bind(this),
-//                           },
-//                         ],
-//                       }
-//                       )}
-//                     />
-//                   </IceFormBinder>
-//                   <IceFormError name="password" />
-//                 </Col>
-//               </Row>
-//             </div>
-//           </IceFormBinderWrapper>
-//         </Dialog>
-//         <Button type="primary" onClick={this.showDialog}>
-//           添加用户
-//         </Button>
-//         <Button type="primary">
-//           <Link to="/">
-//             返回登录界面
-//           </Link>
-//         </Button>
-//       </IceContainer>
-//     );
-//   }
-// }
 
 const defaultValue = {
   name: '',
@@ -225,6 +21,7 @@ export default class SimpleFormDialog extends Component {
     this.field = new Field(this);
     this.state = {
       value: this.props.data || defaultValue,
+      title: this.props.data ? '修改' : '添加',
     };
   }
 
@@ -269,7 +66,7 @@ export default class SimpleFormDialog extends Component {
         style={simpleFormDialog}
         autoFocus={false}
         footerAlign="center"
-        title="添加"
+        title={this.state.title}
         {...this.props}
         onOk={this.onOk}
         onCancel={this.props.onCancel}
@@ -299,9 +96,9 @@ export default class SimpleFormDialog extends Component {
                 ],
               })}
             >
-              <li value={0}>CERT</li>
-              <li value={1}>COLLECTOR</li>
-              <li value={2}>PARSER</li>
+              <li value={0} key='CERT'>CERT</li>
+              <li value={1} key='COLLECTOR'>COLLECTOR</li>
+              <li value={2} key='PARSER'>PARSER</li>
             </Select>
           </FormItem>
         </Form>

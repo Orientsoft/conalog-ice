@@ -1,18 +1,39 @@
 /* eslint no-underscore-dangle: 0 */
 import React, { Component } from 'react';
-import { Table, Pagination, Tab, Search, Button } from '@icedesign/base';
+import { Table, Pagination, Tab, Search, Button, Dialog } from '@icedesign/base';
 import IceContainer from '@icedesign/container';
 import DataBinder from '@icedesign/data-binder';
 import IceLabel from '@icedesign/label';
 import { enquireScreen } from 'enquire-js';
 import Modal from '../Modal';
+import config from '../../../../config';
+import axios from 'axios';
+import moment from 'moment';
+
+const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toString()
 
 @DataBinder({
   tableData: {
     // 详细请求配置请参见 https://github.com/axios/axios
-    url: '/mock/enhance-table-list.json',
-    params: {
-      page: 1,
+    url: conalogUrl + '/certs',
+    method: 'get',
+    responseFormatter: (responseHandler, res, originResponse) => {
+      let list = res.certs;
+      list.forEach((item) => {
+        const { createdAt, updatedAt } = item;
+        item.createdAt = moment(createdAt).format('YYYY-MM-DD HH:mm:ss');
+        item.updatedAt = moment(updatedAt).format('YYYY-MM-DD HH:mm:ss');
+      });
+      const newRes = {
+        status: originResponse.status === 200 ? 'SUCCESS' : 'ERROR',
+        data: {
+          total: res.meta.totalCount,
+          pageSize: res.meta.pageSize,
+          currentPage: res.meta.pageCount,
+          list,
+        },
+      };
+      responseHandler(newRes, originResponse);
     },
     defaultBindingData: {
       list: [],
@@ -34,26 +55,30 @@ export default class EnhanceTable extends Component {
 
     this.queryCache = {};
     this.state = {
-      activeKey: 'solved',
+      // activeKey: 'solved',
       addVisible: false,
+      editVisible: false,
+      choosedcert: {},
+      allGroups: [],
     };
   }
 
   componentDidMount() {
+    const url = conalogUrl + '/groups'
+    axios.get(url)
+      .then((response) => {
+        this.state.allGroups = response.data.groups;
+        this.setState({
+          allGroups: this.state.allGroups,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        // Message.error(error)
+      });
     this.queryCache.page = 1;
     this.fetchData();
-    this.enquireScreenRegister();
   }
-
-  enquireScreenRegister = () => {
-    const mediaCondition = 'only screen and (max-width: 720px)';
-
-    enquireScreen((mobile) => {
-      this.setState({
-        isMobile: mobile,
-      });
-    }, mediaCondition);
-  };
 
   fetchData = () => {
     this.props.updateBindingData('tableData', {
@@ -69,42 +94,66 @@ export default class EnhanceTable extends Component {
     );
   };
 
-  editItem = (record, e) => {
-    e.preventDefault();
-    // TODO: record 为该行所对应的数据，可自定义操作行为
+  editItem = (record) => {
+    this.state.choosedcert = record;
+    this.setState({
+      editVisible: true,
+    });
+  };
+
+  deleteItem = (record) => {
+    let id = record._id;
+    let username = record.username;
+    Dialog.confirm({
+      title: '删除',
+      content: '确定删除用户  ' + username + '?',
+      onOk: () => {
+        const that = this;
+        const url = conalogUrl + '/certs/' + id
+        axios.delete(url)
+          .then((response) => {
+            that.fetchData({
+              page: 1,
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+            // Message.error(error)
+          });
+      },
+    });
   };
 
   renderOperations = (value, index, record) => {
     return (
-      <div
-        className="enhance-table-operation"
-        style={styles.enhanceTableOperation}
-      >
-        <a
-          href="#"
-          style={styles.operation}
-          target="_blank"
-          onClick={this.editItem.bind(this, record)}
-        >
-          解决
+      <div style={{ lineHeight: '28px' }}>
+        <a onClick={() => { this.editItem(record); }} style={styles.operation} >
+          编辑
         </a>
-        <a href="#" style={styles.operation} target="_blank">
-          详情
-        </a>
-        <a href="#" style={styles.operation} target="_blank">
-          分类
+        <a onClick={() => { this.deleteItem(record); }} style={styles.operation} >
+          删除
         </a>
       </div>
     );
   };
 
-  renderStatus = (value) => {
-    return (
-      <IceLabel inverse={false} status="default">
-        {value}
-      </IceLabel>
-    );
-  };
+  rendergroup = (record) => {
+    let d = '';
+    this.state.allGroups.filter((item) => {
+      if (item._id === record) {
+        d = item.name;
+      }
+    });
+    return d;
+  }
+
+  // renderStatus = (value) => {
+  //   return (
+  //     <IceLabel inverse={false} status="default">
+  //       {value}
+  //     </IceLabel>
+  //   );
+  // };
 
   changePage = (currentPage) => {
     this.queryCache.page = currentPage;
@@ -131,25 +180,64 @@ export default class EnhanceTable extends Component {
     this.queryCache.keywords = value.key;
     this.fetchData();
   };
-  onShowModal =() => {
+
+  onShowModal = () => {
     this.setState({
       addVisible: true,
     });
-  }
-  _onOk =() => {
+  };
+
+  onAddOk = (data) => {
+    const that = this;
+    const url = conalogUrl + '/certs'
+    axios.post(url, data)
+      .then((response) => {
+        this.setState({
+          addVisible: false,
+        });
+        that.fetchData({
+          page: 1,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        // Message.error(error)
+      });
+  };
+
+  onAddCancel = () => {
     this.setState({
       addVisible: false,
     });
-  }
-  _onCancel =() => {
+  };
+
+  onEditOk = (data) => {
+    console.log('edit', data)
+    let id = this.state.choosedcert._id
+    const that = this;
+    const url = conalogUrl + '/certs/' + id
+    axios.put(url, data)
+      .then((response) => {
+        that.setState({
+          editVisible: false,
+        });
+        that.fetchData({
+          page: 1,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  onEditCancel = () => {
     this.setState({
-      addVisible: false,
+      editVisible: false,
     });
-  }
+  };
 
   render() {
     const tableData = this.props.bindingData.tableData;
-    console.log('ccc', this.state.visible)
     return (
       <div className="enhance-table" style={styles.enhanceTable}>
         <IceContainer style={styles.card}>
@@ -178,26 +266,46 @@ export default class EnhanceTable extends Component {
             hasBorder={false}
           >
             <Table.Column
-              title="问题描述"
-              cell={this.renderTitle}
-              width={320}
+              title="ID"
+              width={230}
+              dataIndex="_id"
             />
-            <Table.Column title="问题分类" dataIndex="type" width={85} />
+            {/* <Table.Column title="分类" dataIndex="type" width={85} /> */}
             <Table.Column
-              title="发布时间"
-              dataIndex="publishTime"
+              title="IP"
+              dataIndex="host"
               width={150}
             />
             <Table.Column
-              title="状态"
-              dataIndex="publishStatus"
+              title="端口"
+              dataIndex="port"
               width={85}
-              cell={this.renderStatus}
+            // cell={this.renderStatus}
+            />
+            <Table.Column
+              title="用户名"
+              dataIndex="username"
+              width={150}
+            />
+            <Table.Column
+              title="分组"
+              dataIndex="group"
+              width={150}
+              cell={this.rendergroup}
+            />
+            <Table.Column
+              title="创建"
+              dataIndex="createdAt"
+              width={150}
+            />
+            <Table.Column
+              title="更新"
+              dataIndex="updatedAt"
+              width={150}
             />
             <Table.Column
               title="操作"
-              dataIndex="operation"
-              width={150}
+              width={100}
               cell={this.renderOperations}
             />
           </Table>
@@ -211,7 +319,8 @@ export default class EnhanceTable extends Component {
             />
           </div>
         </IceContainer>
-        {this.state.addVisible && <Modal onOk={this._onOk} onCancel={this._onCancel} />}
+        {this.state.editVisible && <Modal data={this.state.choosedcert} onOk={this.onEditOk} onCancel={this.onEditCancel} />}
+        {this.state.addVisible && <Modal onOk={this.onAddOk} onCancel={this.onAddCancel} />}
       </div>
     );
   }

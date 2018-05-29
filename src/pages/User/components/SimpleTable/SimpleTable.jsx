@@ -8,6 +8,7 @@ import Modal from '../Modal';
 import { enquireScreen } from 'enquire-js';
 import config from '../../../../config';
 import axios from 'axios';
+import moment from 'moment';
 
 const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toString()
 
@@ -16,13 +17,19 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
     url: conalogUrl + '/users',
     method: 'get',
     responseFormatter: (responseHandler, res, originResponse) => {
+      let list = res.users
+      list.forEach((item) => {
+        const { createdAt, updatedAt } = item;
+        item.createdAt = moment(createdAt).format('YYYY-MM-DD HH:mm:ss');
+        item.updatedAt = moment(updatedAt).format('YYYY-MM-DD HH:mm:ss');
+      });
       const newRes = {
         status: originResponse.status === 200 ? 'SUCCESS' : 'ERROR',
         data: {
           total: res.meta.totalCount,
           pageSize: res.meta.pageSize,
           currentPage: res.meta.pageCount,
-          list: res.users,
+          list,
         },
       };
       responseHandler(newRes, originResponse);
