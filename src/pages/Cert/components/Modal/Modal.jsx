@@ -11,9 +11,6 @@ import config from '../../../../config';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
 
-// const { Row, Col } = Grid;
-// const { Group: RadioGroup } = Radio;
-// const Option = Select.Option;
 const { Item: FormItem } = Form;
 const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toString()
 
@@ -66,7 +63,8 @@ export default class SimpleFormDialog extends Component {
       host: value.host,
       port: value.port,
       username: value.username,
-      password: CryptoJS.AES.decrypt(value.password, 'VAULT_BOY').toString(CryptoJS.enc.Utf8),
+      password: value.password,
+      // password: CryptoJS.AES.decrypt(value.password, 'VAULT_BOY').toString(CryptoJS.enc.Utf8),
       key: value.key,
       group: value.group,
     });
@@ -117,13 +115,12 @@ export default class SimpleFormDialog extends Component {
       values.port = parseInt(values.port);
       if (values.type === 0) {
         values.key = '';
-        const CERT_KEY = 'VAULT_BOY';
-        const encrypted = CryptoJS.AES.encrypt(values.password, CERT_KEY).toString();
-        values.password = encrypted;
+        // const CERT_KEY = 'VAULT_BOY';
+        // const encrypted = CryptoJS.AES.encrypt(values.password, CERT_KEY).toString();
+        // values.password = encrypted;
       } else if (values.password === 1) {
         values.password = '';
       }
-      console.log('data', values);
       this.props.onOk(values);
     });
   };
@@ -254,164 +251,6 @@ export default class SimpleFormDialog extends Component {
       </Dialog>
     );
   }
-
-
-  // render() {
-  //   const { isMobile } = this.state;
-  //   const simpleFormDialog = {
-  //     ...styles.simpleFormDialog,
-  //   };
-  //   // 响应式处理
-  //   if (isMobile) {
-  //     simpleFormDialog.width = '300px';
-  //   }
-
-  //   return (
-  //     <Dialog
-  //       className="simple-form-dialog"
-  //       style={simpleFormDialog}
-  //       autoFocus={false}
-  //       footerAlign="center"
-  //       title="添加"
-  //       {...this.props}
-  //       onOk={this.onOk}
-  //       onCancel={this.props.onCancel}
-  //       onClose={this.props.onCancel}
-  //       isFullScreen
-  //       visible
-  //     >
-  //       <IceFormBinderWrapper
-  //         ref={(ref) => {
-  //           this.refForm = ref;
-  //         }}
-  //         value={this.state.value}
-  //         onChange={this.onFormChange}
-  //       >
-  //         <div style={styles.dialogContent}>
-  //           <Row style={styles.formRow}>
-  //             <Col span={`${isMobile ? '6' : '3'}`}>
-  //               <label style={styles.formLabel}>主机IP:</label>
-  //             </Col>
-  //             <Col span={`${isMobile ? '18' : '16'}`}>
-  //               <IceFormBinder
-  //                 required
-  //                 message="当前字段必填"
-  //               >
-  //                 <Input
-  //                   name="host"
-  //                   style={styles.input}
-  //                 />
-  //               </IceFormBinder>
-  //               <IceFormError name="keywords" />
-  //             </Col>
-  //           </Row>
-  //           <Row style={styles.formRow}>
-  //             <Col span={`${isMobile ? '6' : '3'}`}>
-  //               <label style={styles.formLabel}>端口:</label>
-  //             </Col>
-  //             <Col span={`${isMobile ? '18' : '16'}`}>
-  //               <IceFormBinder
-  //                 required
-  //                 message="当前字段必填"
-  //               >
-  //                 <Input
-  //                   name="port"
-  //                   style={styles.input}
-  //                 />
-  //               </IceFormBinder>
-  //               <IceFormError name="keywords" />
-  //             </Col>
-  //           </Row>
-  //           <Row style={styles.formRow}>
-  //             <Col span={`${isMobile ? '6' : '3'}`}>
-  //               <label style={styles.formLabel}>用户名:</label>
-  //             </Col>
-  //             <Col span={`${isMobile ? '18' : '16'}`}>
-  //               <IceFormBinder
-  //                 required
-
-  //                 message="当前字段必填"
-  //               >
-  //                 <Input
-  //                   name="username"
-  //                   style={styles.input}
-  //                 />
-  //               </IceFormBinder>
-  //               <IceFormError name="keywords" />
-  //             </Col>
-  //           </Row>
-  //           <Row style={styles.formRow}>
-  //             <Col span={`${isMobile ? '6' : '3'}`}>
-  //               <label style={styles.formLabel}>类型:</label>
-  //             </Col>
-  //             <Col span={`${isMobile ? '18' : '16'}`}>
-  //               <IceFormBinder
-  //                 required
-  //                 message="当前字段必填"
-  //               >
-  //                 <Select name="type" style={styles.input}>
-  //                   <Option key="PASSWORD" value={0} >PASSWORD</Option>
-  //                   <Option key="PASSWORD" value={1} >KEY</Option>
-  //                 </Select>
-  //               </IceFormBinder>
-  //               <IceFormError name="keywords" />
-  //             </Col>
-  //           </Row>
-  //           <Row style={styles.formRow}>
-  //             <Col span={`${isMobile ? '6' : '3'}`}>
-  //               <label style={styles.formLabel}>密码:</label>
-  //             </Col>
-  //             <Col span={`${isMobile ? '18' : '16'}`}>
-  //               <IceFormBinder
-  //                 required
-  //                 message="当前字段必填"
-  //               >
-  //                 <Input
-  //                   name="password"
-  //                   style={styles.input}
-  //                 />
-  //               </IceFormBinder>
-  //               <IceFormError name="keywords" />
-  //             </Col>
-  //           </Row>
-  //           <Row style={styles.formRow}>
-  //             <Col span={`${isMobile ? '6' : '3'}`}>
-  //               <label style={styles.formLabel}>key:</label>
-  //             </Col>
-  //             <Col span={`${isMobile ? '18' : '16'}`}>
-  //               <IceFormBinder
-  //                 required
-  //               // message="当前字段必填"
-  //               >
-  //                 <Input
-  //                   name="key"
-  //                   style={styles.input}
-  //                 />
-  //               </IceFormBinder>
-  //               <IceFormError name="keywords" />
-  //             </Col>
-  //           </Row>
-  //           <Row style={styles.formRow}>
-  //             <Col span={`${isMobile ? '6' : '3'}`}>
-  //               <label style={styles.formLabel}>分组:</label>
-  //             </Col>
-  //             <Col span={`${isMobile ? '18' : '16'}`}>
-  //               <IceFormBinder
-  //                 required
-  //                 message="当前字段必填"
-  //               >
-  //                 <Select name="group" style={styles.input}>
-
-  //                 </Select>
-  //               </IceFormBinder>
-  //               <IceFormError name="keywords" />
-  //             </Col>
-  //           </Row>
-  //         </div>
-  //       </IceFormBinderWrapper>
-  //     </Dialog>
-  //   );
-  // }
 }
 
 const styles = {

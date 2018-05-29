@@ -124,6 +124,30 @@ export default class EnhanceTable extends Component {
     });
   };
 
+  testConnect = (record) => {
+    let id = record._id;
+    const that = this;
+    const url = conalogUrl + '/certs/' + id + '/test'
+    axios.get(url)
+      .then((response) => {
+        Dialog.confirm({
+          title: '测试',
+          content: '测试成功',
+          onOk: () => { },
+        });
+      })
+      .catch((error) => {
+        console.log(error)
+        Dialog.confirm({
+          title: '测试',
+          content: error.response.data,
+          onOk: () => { },
+        });
+        // Message.error(error)
+      });
+
+  };
+
   renderOperations = (value, index, record) => {
     return (
       <div style={{ lineHeight: '28px' }}>
@@ -132,6 +156,9 @@ export default class EnhanceTable extends Component {
         </a>
         <a onClick={() => { this.deleteItem(record); }} style={styles.operation} >
           删除
+        </a>
+        <a onClick={() => { this.testConnect(record); }} style={styles.operation} >
+          测试
         </a>
       </div>
     );
@@ -157,7 +184,6 @@ export default class EnhanceTable extends Component {
 
   changePage = (currentPage) => {
     this.queryCache.page = currentPage;
-
     this.fetchData();
   };
 
@@ -305,7 +331,7 @@ export default class EnhanceTable extends Component {
             />
             <Table.Column
               title="操作"
-              width={100}
+              width={150}
               cell={this.renderOperations}
             />
           </Table>
