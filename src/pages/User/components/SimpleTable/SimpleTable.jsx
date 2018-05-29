@@ -132,7 +132,7 @@ export default class SimpleTable extends Component {
           .catch((error) => {
             Dialog.alert({
               title: 'alert',
-              content: error.response.data,
+              content: error.response.data.message ? error.response.data.message : error.response.data,
               onOk: () => { },
             });
             // Message.error(error)
@@ -179,7 +179,7 @@ export default class SimpleTable extends Component {
       .catch((error) => {
         Dialog.alert({
           title: 'alert',
-          content: error.response.data,
+          content: error.response.data.message ? error.response.data.message : error.response.data,
           onOk: () => { },
         });
         // Message.error(error)
@@ -208,7 +208,7 @@ export default class SimpleTable extends Component {
       .catch((error) => {
         Dialog.alert({
           title: 'alert',
-          content: error.response.data,
+          content: error.response.data.message ? error.response.data.message : error.response.data,
           onOk: () => { },
         });
       });
