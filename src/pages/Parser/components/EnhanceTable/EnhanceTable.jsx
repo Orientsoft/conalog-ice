@@ -1,18 +1,38 @@
 /* eslint no-underscore-dangle: 0 */
 import React, { Component } from 'react';
-import { Table, Pagination, Tab, Search, Button } from '@icedesign/base';
+import { Table, Pagination, Tab, Search, Button, Dialog, Icon } from '@icedesign/base';
 import IceContainer from '@icedesign/container';
 import DataBinder from '@icedesign/data-binder';
 import IceLabel from '@icedesign/label';
 import { enquireScreen } from 'enquire-js';
 import Modal from '../Modal';
+import config from '../../../../config';
+import axios from 'axios';
+import moment from 'moment';
+
+const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toString()
 
 @DataBinder({
   tableData: {
-    // 详细请求配置请参见 https://github.com/axios/axios
-    url: '/mock/enhance-table-list.json',
-    params: {
-      page: 1,
+    url: conalogUrl + '/parsers',
+    method: 'get',
+    responseFormatter: (responseHandler, res, originResponse) => {
+      let list = res.parsers;
+      list.forEach((item) => {
+        const { createdAt, updatedAt } = item;
+        item.createdAt = moment(createdAt).format('YYYY-MM-DD HH:mm:ss');
+        item.updatedAt = moment(updatedAt).format('YYYY-MM-DD HH:mm:ss');
+      });
+      const newRes = {
+        status: originResponse.status === 200 ? 'SUCCESS' : 'ERROR',
+        data: {
+          total: res.meta.totalCount,
+          pageSize: res.meta.pageSize,
+          currentPage: res.meta.page + 1,
+          list,
+        },
+      };
+      responseHandler(newRes, originResponse);
     },
     defaultBindingData: {
       list: [],
@@ -34,31 +54,45 @@ export default class EnhanceTable extends Component {
 
     this.queryCache = {};
     this.state = {
-      activeKey: 'solved',
+      // activeKey: 'solved',
       addVisible: false,
       editVisible: false,
+      choosedparser: {},
+      allGroups: [],
     };
   }
 
   componentDidMount() {
-    this.queryCache.page = 1;
-    this.fetchData();
-    this.enquireScreenRegister();
+    const url = conalogUrl + '/groups'
+    axios.get(url)
+      .then((response) => {
+        this.state.allGroups = response.data.groups;
+        this.setState({
+          allGroups: this.state.allGroups,
+        });
+      })
+      .catch((error) => {
+        Dialog.alert({
+          title: 'alert',
+          content: error.response.data.message ? error.response.data.message : error.response.data,
+          onOk: () => { },
+        });
+      });
+    // this.queryCache.page = 1;
+    this.fetchData({
+      page: 0,
+    });
+    // this.fetchData();
   }
 
-  enquireScreenRegister = () => {
-    const mediaCondition = 'only screen and (max-width: 720px)';
-
-    enquireScreen((mobile) => {
-      this.setState({
-        isMobile: mobile,
-      });
-    }, mediaCondition);
-  };
-
-  fetchData = () => {
+  // fetchData = () => {
+  //   this.props.updateBindingData('tableData', {
+  //     data: this.queryCache,
+  //   });
+  // };
+  fetchData = (page) => {
     this.props.updateBindingData('tableData', {
-      data: this.queryCache,
+      params: page,
     });
   };
 
@@ -70,81 +104,181 @@ export default class EnhanceTable extends Component {
     );
   };
 
-  editItem = (record, e) => {
-    e.preventDefault();
-    // TODO: record 为该行所对应的数据，可自定义操作行为
+  editItem = (record) => {
+    this.state.choosedparser = record;
+    this.setState({
+      editVisible: true,
+    });
+  };
+
+  deleteItem = (record) => {
+    let id = record._id;
+    let name = record.name;
+    Dialog.confirm({
+      title: '删除',
+      content: '确定删除用户  ' + name + '?',
+      onOk: () => {
+        const that = this;
+        const url = conalogUrl + '/parsers/' + id
+        axios.delete(url)
+          .then((response) => {
+            that.fetchData({
+              page: 0,
+            });
+          })
+          .catch((error) => {
+            Dialog.alert({
+              title: 'alert',
+              content: error.response.data.message ? error.response.data.message : error.response.data,
+              onOk: () => { },
+            });
+          });
+      },
+    });
+  };
+
+  startParser = (record) => {
+    let id = record._id;
+    const url = conalogUrl + '/parsers/' + id + '/test'
+    axios.get(url)
+      .then((response) => {
+        Dialog.confirm({
+          title: '测试',
+          content: response.statusText,
+          onOk: () => { },
+        });
+      })
+      .catch((error) => {
+        Dialog.alert({
+          title: 'alert',
+          content: error.response.data.message ? error.response.data.message : error.response.data,
+          onOk: () => { },
+        });
+      });
   };
 
   renderOperations = (value, index, record) => {
     return (
-      <div
-        className="enhance-table-operation"
-        style={styles.enhanceTableOperation}
-      >
-        <a
-          href="#"
-          style={styles.operation}
-          target="_blank"
-          onClick={this.editItem.bind(this, record)}
-        >
-          解决
+      <div style={{ lineHeight: '28px' }}>
+        <a onClick={() => { this.editItem(record); }} style={styles.operation} >
+          编辑
         </a>
-        <a href="#" style={styles.operation} target="_blank">
-          详情
+        <a onClick={() => { this.deleteItem(record); }} style={styles.operation} >
+          删除
         </a>
-        <a href="#" style={styles.operation} target="_blank">
-          分类
+        <a onClick={() => { this.startParser(record); }} style={styles.operation} >
+          启动
         </a>
       </div>
     );
   };
 
-  renderStatus = (value) => {
-    return (
-      <IceLabel inverse={false} status="default">
-        {value}
-      </IceLabel>
-    );
-  };
+  rendergroup = (record) => {
+    let d = '';
+    this.state.allGroups.filter((item) => {
+      if (item._id === record) {
+        d = item.name;
+      }
+    });
+    return d;
+  }
+
+  renderchannel = (record) => {
+    let d = '';
+    if (record === 0) {
+      d = 'REDIS_CHANNEL';
+    } else if (record === 1) {
+      d = 'NSQ_QUEUE';
+    }
+    return d;
+  }
+
+  renderrunning = (record) => {
+    if (record) {
+      return <Icon type="set" />;
+    } else {
+      return <div style={styles.icon}><Icon  type="set" /></div> ;
+    }
+  }
 
   changePage = (currentPage) => {
-    this.queryCache.page = currentPage;
-
-    this.fetchData();
+    this.fetchData({
+      page: currentPage - 1,
+    });
   };
 
-  onSearch = (value) => {
-    this.queryCache.keywords = value.key;
-    this.fetchData();
-  };
-  onShowModal =() => {
+  onShowModal = () => {
     this.setState({
       addVisible: true,
     });
-  }
-  _onAddOk =() => {
+  };
+
+  onAddOk = (data) => {
+    const that = this;
+    const url = conalogUrl + '/parsers'
+    axios.post(url, data)
+      .then((response) => {
+        that.setState({
+          addVisible: false,
+        });
+        that.fetchData({
+          page: 0,
+        });
+      })
+      .catch((error) => {
+        Dialog.alert({
+          title: 'alert',
+          content: error.response.data.message ? error.response.data.message : error.response.data,
+          onOk: () => { },
+        });
+      });
+  };
+
+  onAddCancel = () => {
     this.setState({
       addVisible: false,
     });
-  }
-  _onAddCancel =() => {
+  };
+
+  onEditOk = (data) => {
+    let id = this.state.choosedparser._id
+    const that = this;
+    const url = conalogUrl + '/parsers/' + id
+    axios.put(url, data)
+      .then((response) => {
+        that.setState({
+          editVisible: false,
+        });
+        that.fetchData({
+          page: 0,
+        });
+      })
+      .catch((error) => {
+        Dialog.alert({
+          title: 'alert',
+          content: error.response.data.message ? error.response.data.message : error.response.data,
+          onOk: () => { },
+        });
+      });
+  };
+
+  onEditCancel = () => {
     this.setState({
-      addVisible: false,
+      editVisible: false,
     });
-  }
+  };
 
   render() {
     const tableData = this.props.bindingData.tableData;
-    console.log('ccc', this.state.visible)
     return (
       <div className="enhance-table" style={styles.enhanceTable}>
         <IceContainer style={styles.card}>
           <div>
             <Button type="primary" onClick={this.onShowModal}>
-              添加 parser
+              添加解析
             </Button>
           </div>
-          <div style={styles.extraFilter}>
+          {/* <div style={styles.extraFilter}>
             <Search
               style={styles.search}
               type="primary"
@@ -153,7 +287,7 @@ export default class EnhanceTable extends Component {
               searchText=""
               onSearch={this.onSearch}
             />
-          </div>
+          </div> */}
         </IceContainer>
         <IceContainer>
           <Table
@@ -164,25 +298,73 @@ export default class EnhanceTable extends Component {
             hasBorder={false}
           >
             <Table.Column
-              title="问题描述"
-              cell={this.renderTitle}
-              width={320}
+              title="ID"
+              width={230}
+              dataIndex="_id"
             />
-            <Table.Column title="问题分类" dataIndex="type" width={85} />
+            {/* <Table.Column title="分类" dataIndex="type" width={85} /> */}
             <Table.Column
-              title="发布时间"
-              dataIndex="publishTime"
+              title="名字"
+              dataIndex="name"
               width={150}
             />
             <Table.Column
-              title="状态"
-              dataIndex="publishStatus"
+              title="脚本"
+              dataIndex="path"
               width={85}
-              cell={this.renderStatus}
+            // cell={this.renderStatus}
+            />
+            <Table.Column
+              title="参数"
+              dataIndex="parameter"
+              width={85}
+            />
+            <Table.Column
+              title="数据输入通道类型"
+              dataIndex="input.type"
+              width={150}
+              cell={this.renderchannel}
+            />
+            <Table.Column
+              title="数据输入通道名"
+              dataIndex="input.name"
+              width={150}
+            />
+            <Table.Column
+              title="数据输出通道类型"
+              dataIndex="output.type"
+              width={150}
+              cell={this.renderchannel}
+            />
+            <Table.Column
+              title="数据输出通道名"
+              dataIndex="output.name"
+              width={150}
+            />
+            <Table.Column
+              title="分组"
+              dataIndex="group"
+              width={150}
+              cell={this.rendergroup}
+            />
+            <Table.Column
+              title="创建"
+              dataIndex="createdAt"
+              width={150}
+            />
+            <Table.Column
+              title="更新"
+              dataIndex="updatedAt"
+              width={150}
+            />
+            <Table.Column
+              title="运行"
+              dataIndex="running"
+              width={50}
+              cell={this.renderrunning}
             />
             <Table.Column
               title="操作"
-              dataIndex="operation"
               width={150}
               cell={this.renderOperations}
             />
@@ -197,7 +379,8 @@ export default class EnhanceTable extends Component {
             />
           </div>
         </IceContainer>
-        {this.state.addVisible && <Modal  onOk={this._onAddOk} onCancel={this._onAddCancel} />}
+        {this.state.editVisible && <Modal data={this.state.choosedparser} onOk={this.onEditOk} onCancel={this.onEditCancel} />}
+        {this.state.addVisible && <Modal onOk={this.onAddOk} onCancel={this.onAddCancel} />}
       </div>
     );
   }
@@ -239,5 +422,9 @@ const styles = {
   pagination: {
     textAlign: 'right',
     paddingTop: '26px',
+  },
+  icon: {
+    animation: 'change 3s linear infinite',
+    // display: 'inline - block',
   },
 };

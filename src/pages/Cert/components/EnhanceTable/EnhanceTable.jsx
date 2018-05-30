@@ -28,7 +28,7 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
         data: {
           total: res.meta.totalCount,
           pageSize: res.meta.pageSize,
-          currentPage: res.meta.pageCount,
+          currentPage: res.meta.page + 1,
           list,
         },
       };
@@ -78,13 +78,21 @@ export default class EnhanceTable extends Component {
           onOk: () => { },
         });
       });
-    this.queryCache.page = 1;
-    this.fetchData();
+    // this.queryCache.page = 1;
+    this.fetchData({
+      page: 0,
+    });
+    // this.fetchData();
   }
 
-  fetchData = () => {
+  // fetchData = () => {
+  //   this.props.updateBindingData('tableData', {
+  //     data: this.queryCache,
+  //   });
+  // };
+  fetchData = (page) => {
     this.props.updateBindingData('tableData', {
-      data: this.queryCache,
+      params: page,
     });
   };
 
@@ -115,7 +123,7 @@ export default class EnhanceTable extends Component {
         axios.delete(url)
           .then((response) => {
             that.fetchData({
-              page: 1,
+              page: 0,
             });
           })
           .catch((error) => {
@@ -183,9 +191,14 @@ export default class EnhanceTable extends Component {
   //   );
   // };
 
+  // changePage = (currentPage) => {
+  //   this.queryCache.page = currentPage;
+  //   this.fetchData();
+  // };
   changePage = (currentPage) => {
-    this.queryCache.page = currentPage;
-    this.fetchData();
+    this.fetchData({
+      page: currentPage - 1,
+    });
   };
 
   onShowModal = () => {
@@ -203,7 +216,7 @@ export default class EnhanceTable extends Component {
           addVisible: false,
         });
         that.fetchData({
-          page: 1,
+          page: 0,
         });
       })
       .catch((error) => {
@@ -231,7 +244,7 @@ export default class EnhanceTable extends Component {
           editVisible: false,
         });
         that.fetchData({
-          page: 1,
+          page: 0,
         });
       })
       .catch((error) => {

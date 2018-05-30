@@ -5,20 +5,8 @@ const autoGenAsideNavs = [
   { text: '认证', to: '/cert', icon: 'yonghu' },
   { text: '采集', to: '/collector', icon: 'copy' },
   { text: '解析', to: '/parser', icon: 'pin' },
-  {
-    text: '状态',
-    to: '/status',
-    icon: 'message',
-    children: [
-      { text: '主动', to: '/status/active' },
-      { text: '被动', to: '/status/passive' },
-      { text: '代理', to: '/status/agent' },
-      { text: '解析', to: '/status/parser' },
-    ],
-  },
   { text: '用户', to: '/user', icon: 'yonghu' },
   { text: '分组', to: '/group', icon: 'yonghu' },
-
 ];
 
 // <!-- auto generated navs end -->
