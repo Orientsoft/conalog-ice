@@ -121,7 +121,7 @@ export default class SimpleFormDialog extends Component {
           type: values.outputtype,
           name: values.outputname,
         },
-        parameter: values.parameter,
+        parameter: values.parameter || '',
         group: values.group,
       };
       this.props.onOk(data);
@@ -186,6 +186,17 @@ export default class SimpleFormDialog extends Component {
             </Combobox>
           </FormItem>
 
+          <FormItem label="参数：" {...formItemLayout} hasFeedback >
+            <Input
+              hasLimitHint
+              {...init('parameter', {
+                // rules: [
+                //   { required: true, trigger: 'onBlur', message: '请填写参数' },
+                // ],
+              })}
+            />
+          </FormItem>
+
           <FormItem label="输入数据通道：" {...formItemLayout} hasFeedback>
             <Select
               style={{ width: '100%' }}
@@ -231,17 +242,6 @@ export default class SimpleFormDialog extends Component {
               {...init('outputname', {
                 rules: [
                   { required: true, trigger: 'onBlur', message: '请填写输出数据通道名' },
-                ],
-              })}
-            />
-          </FormItem>
-
-          <FormItem label="参数：" {...formItemLayout} hasFeedback >
-            <Input
-              hasLimitHint
-              {...init('parameter', {
-                rules: [
-                  { required: true, trigger: 'onBlur', message: '请填写参数' },
                 ],
               })}
             />
