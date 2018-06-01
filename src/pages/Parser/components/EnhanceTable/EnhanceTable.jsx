@@ -74,17 +74,20 @@ export default class EnhanceTable extends Component {
         });
       })
       .catch((error) => {
-        Dialog.alert({
-          title: 'alert',
-          content: error.response.data.message ? error.response.data.message : error.response.data,
-          onOk: () => { },
-        });
+        this.alert(error);
       });
     this.fetchData({
       page: 0,
     });
     // 获取parser实例
     this.loop = setInterval(() => this.parserInstances.forEach(id => this.getparserInstance(id)), 3000);
+  }
+  alert = (error) => {
+    Dialog.alert({
+      title: 'alert',
+      content: error.response.data.message ? error.response.data.message : error.response.data,
+      onOk: () => { },
+    });
   }
 
   getparserInstance = (id) => {
@@ -95,11 +98,7 @@ export default class EnhanceTable extends Component {
         this.dealInstance(response.data);
       })
       .catch((error) => {
-        Dialog.alert({
-          title: 'alert',
-          content: error.response.data.message ? error.response.data.message : error.response.data,
-          onOk: () => { },
-        });
+        this.alert(error);
       });
   };
 
@@ -156,11 +155,7 @@ export default class EnhanceTable extends Component {
             });
           })
           .catch((error) => {
-            Dialog.alert({
-              title: 'alert',
-              content: error.response.data.message ? error.response.data.message : error.response.data,
-              onOk: () => { },
-            });
+            this.alert(error);
           });
       },
     });
@@ -176,18 +171,9 @@ export default class EnhanceTable extends Component {
       onOk: () => {
         axios.get(url)
           .then((response) => {
-            // Dialog.confirm({
-            //   title: '启动',
-            //   content: response.statusText,
-            //   onOk: () => { },
-            // });
           })
           .catch((error) => {
-            Dialog.alert({
-              title: 'alert',
-              content: error.response.data.message ? error.response.data.message : error.response.data,
-              onOk: () => { },
-            });
+            this.alert(error);
           });
       },
     });
@@ -206,18 +192,9 @@ export default class EnhanceTable extends Component {
       onOk: () => {
         axios.delete(url)
           .then((response) => {
-            // Dialog.confirm({
-            //   title: '停止',
-            //   content: response.statusText,
-            //   onOk: () => { },
-            // });
           })
           .catch((error) => {
-            Dialog.alert({
-              title: 'alert',
-              content: error.response.data.message ? error.response.data.message : error.response.data,
-              onOk: () => { },
-            });
+            this.alert(error);
           });
       },
     });
@@ -305,11 +282,7 @@ export default class EnhanceTable extends Component {
         });
       })
       .catch((error) => {
-        Dialog.alert({
-          title: 'alert',
-          content: error.response.data.message ? error.response.data.message : error.response.data,
-          onOk: () => { },
-        });
+        this.alert(error);
       });
   };
 
@@ -333,11 +306,7 @@ export default class EnhanceTable extends Component {
         });
       })
       .catch((error) => {
-        Dialog.alert({
-          title: 'alert',
-          content: error.response.data.message ? error.response.data.message : error.response.data,
-          onOk: () => { },
-        });
+        this.alert(error);
       });
   };
 
@@ -355,18 +324,9 @@ export default class EnhanceTable extends Component {
       onOk: () => {
         axios.post(url)
           .then((response) => {
-            // Dialog.confirm({
-            //   title: '启动',
-            //   content: response.statusText,
-            //   onOk: () => { },
-            // });
           })
           .catch((error) => {
-            Dialog.alert({
-              title: 'alert',
-              content: error.response.data.message ? error.response.data.message : error.response.data,
-              onOk: () => { },
-            });
+            this.alert(error);
           });
       },
     });
@@ -379,18 +339,9 @@ export default class EnhanceTable extends Component {
       onOk: () => {
         axios.delete(url)
           .then((response) => {
-            // Dialog.confirm({
-            //   title: '停止',
-            //   content: response.statusText,
-            //   onOk: () => { },
-            // });
           })
           .catch((error) => {
-            Dialog.alert({
-              title: 'alert',
-              content: error.response.data.message ? error.response.data.message : error.response.data,
-              onOk: () => { },
-            });
+            this.alert(error);
           });
       },
     });

@@ -66,6 +66,14 @@ export default class SimpleTable extends Component {
     });
   }
 
+  alert = (error) => {
+    Dialog.alert({
+      title: 'alert',
+      content: error.response.data.message ? error.response.data.message : error.response.data,
+      onOk: () => { },
+    });
+  }
+
   fetchData = ({ page }) => {
     this.props.updateBindingData('tableData', {
       params: {
@@ -120,11 +128,7 @@ export default class SimpleTable extends Component {
             });
           })
           .catch((error) => {
-            Dialog.alert({
-              title: 'alert',
-              content: error.response.data.message ? error.response.data.message : error.response.data,
-              onOk: () => { },
-            });
+            this.alert(error);
           });
       },
     });
@@ -166,11 +170,7 @@ export default class SimpleTable extends Component {
         });
       })
       .catch((error) => {
-        Dialog.alert({
-          title: 'alert',
-          content: error.response.data.message ? error.response.data.message : error.response.data,
-          onOk: () => { },
-        });
+        this.alert(error);
       });
   };
 
@@ -194,11 +194,7 @@ export default class SimpleTable extends Component {
         });
       })
       .catch((error) => {
-        Dialog.alert({
-          title: 'alert',
-          content: error.response.data.message ? error.response.data.message : error.response.data,
-          onOk: () => { },
-        });
+        this.alert(error);
       });
   };
 

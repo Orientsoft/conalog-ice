@@ -72,11 +72,7 @@ export default class EnhanceTable extends Component {
         });
       })
       .catch((error) => {
-        Dialog.alert({
-          title: 'alert',
-          content: error.response.data.message ? error.response.data.message : error.response.data,
-          onOk: () => { },
-        });
+        this.alert(error);
       });
     // this.queryCache.page = 1;
     this.fetchData({
@@ -90,6 +86,15 @@ export default class EnhanceTable extends Component {
   //     data: this.queryCache,
   //   });
   // };
+
+  alert = (error) => {
+    Dialog.alert({
+      title: 'alert',
+      content: error.response.data.message ? error.response.data.message : error.response.data,
+      onOk: () => { },
+    });
+  }
+
   fetchData = (page) => {
     this.props.updateBindingData('tableData', {
       params: page,
@@ -127,11 +132,7 @@ export default class EnhanceTable extends Component {
             });
           })
           .catch((error) => {
-            Dialog.alert({
-              title: 'alert',
-              content: error.response.data.message ? error.response.data.message : error.response.data,
-              onOk: () => { },
-            });
+            this.alert(error);
           });
       },
     });
@@ -149,11 +150,7 @@ export default class EnhanceTable extends Component {
         });
       })
       .catch((error) => {
-        Dialog.alert({
-          title: 'alert',
-          content: error.response.data.message ? error.response.data.message : error.response.data,
-          onOk: () => { },
-        });
+        this.alert(error);
       });
   };
 
@@ -220,11 +217,7 @@ export default class EnhanceTable extends Component {
         });
       })
       .catch((error) => {
-        Dialog.alert({
-          title: 'alert',
-          content: error.response.data.message ? error.response.data.message : error.response.data,
-          onOk: () => { },
-        });
+        this.alert(error);
       });
   };
 
@@ -248,11 +241,7 @@ export default class EnhanceTable extends Component {
         });
       })
       .catch((error) => {
-        Dialog.alert({
-          title: 'alert',
-          content: error.response.data.message ? error.response.data.message : error.response.data,
-          onOk: () => { },
-        });
+        this.alert(error);
       });
   };
 
