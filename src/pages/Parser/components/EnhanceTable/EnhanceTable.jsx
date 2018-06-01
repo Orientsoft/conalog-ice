@@ -176,11 +176,11 @@ export default class EnhanceTable extends Component {
       onOk: () => {
         axios.get(url)
           .then((response) => {
-            Dialog.confirm({
-              title: '启动',
-              content: response.statusText,
-              onOk: () => { },
-            });
+            // Dialog.confirm({
+            //   title: '启动',
+            //   content: response.statusText,
+            //   onOk: () => { },
+            // });
           })
           .catch((error) => {
             Dialog.alert({
@@ -206,11 +206,11 @@ export default class EnhanceTable extends Component {
       onOk: () => {
         axios.delete(url)
           .then((response) => {
-            Dialog.confirm({
-              title: '停止',
-              content: response.statusText,
-              onOk: () => { },
-            });
+            // Dialog.confirm({
+            //   title: '停止',
+            //   content: response.statusText,
+            //   onOk: () => { },
+            // });
           })
           .catch((error) => {
             Dialog.alert({
@@ -347,6 +347,55 @@ export default class EnhanceTable extends Component {
     });
   };
 
+  onStartAllParser = () => {
+    const url = conalogUrl + '/parsers/instances';
+    Dialog.confirm({
+      title: '启动',
+      content: '确认启动所有parser?',
+      onOk: () => {
+        axios.post(url)
+          .then((response) => {
+            // Dialog.confirm({
+            //   title: '启动',
+            //   content: response.statusText,
+            //   onOk: () => { },
+            // });
+          })
+          .catch((error) => {
+            Dialog.alert({
+              title: 'alert',
+              content: error.response.data.message ? error.response.data.message : error.response.data,
+              onOk: () => { },
+            });
+          });
+      },
+    });
+  }
+  onStopAllParser = () => {
+    const url = conalogUrl + '/parsers/instances'
+    Dialog.confirm({
+      title: '启动',
+      content: '确认停止所有parser?',
+      onOk: () => {
+        axios.delete(url)
+          .then((response) => {
+            // Dialog.confirm({
+            //   title: '停止',
+            //   content: response.statusText,
+            //   onOk: () => { },
+            // });
+          })
+          .catch((error) => {
+            Dialog.alert({
+              title: 'alert',
+              content: error.response.data.message ? error.response.data.message : error.response.data,
+              onOk: () => { },
+            });
+          });
+      },
+    });
+  }
+
   expandedRowRender = (record) => {
     let allInstances = this.state.allInstances;
     let data = allInstances.filter(item => item.parser === record._id) ? allInstances.filter(item => item.parser === record._id) : [];
@@ -473,6 +522,14 @@ export default class EnhanceTable extends Component {
           <div>
             <Button type="primary" onClick={this.onShowModal}>
               添加解析
+            </Button>
+          </div>
+          <div>
+            <Button type="primary" onClick={this.onStartAllParser}>
+              启动
+            </Button>
+            <Button type="primary" onClick={this.onStopAllParser}>
+              停止
             </Button>
           </div>
           {/* <div style={styles.extraFilter}>
