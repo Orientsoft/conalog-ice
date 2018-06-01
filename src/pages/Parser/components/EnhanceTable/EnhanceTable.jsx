@@ -61,7 +61,6 @@ export default class EnhanceTable extends Component {
       choosedparser: {},
       allGroups: [],
       allInstances: [],
-      expandedRowKeys: [],
     };
   }
 
@@ -456,11 +455,6 @@ export default class EnhanceTable extends Component {
   };
 
   onExpandedChange = (expandedRowKeys, currentRowKey, expanded, currentRecord) => {
-    // console.log('dd', currentRowKey)
-    // this.state.expandedRowKeys = expandedRowKeys;
-    // this.setState({
-    //   expandedRowKeys: this.state.expandedRowKeys,
-    // });
     let id = currentRecord._id;
     if (expanded) {
       this.parserInstances.push(id);
@@ -472,6 +466,7 @@ export default class EnhanceTable extends Component {
 
   render() {
     const tableData = this.props.bindingData.tableData;
+    tableData.list.forEach((item, key) => item.id = key);
     return (
       <div className="enhance-table" style={styles.enhanceTable}>
         <IceContainer style={styles.card}>
@@ -500,7 +495,6 @@ export default class EnhanceTable extends Component {
             hasBorder={false}
             expandedRowRender={this.expandedRowRender}
             onExpandedChange={this.onExpandedChange}
-            // expandedRowKeys={this.state.expandedRowKeys}
           >
             <Table.Column
               title="ID"
@@ -563,7 +557,7 @@ export default class EnhanceTable extends Component {
             <Table.Column
               title="运行"
               dataIndex="running"
-              width={50}
+              width={80}
               cell={this.renderrunning}
             />
             <Table.Column
