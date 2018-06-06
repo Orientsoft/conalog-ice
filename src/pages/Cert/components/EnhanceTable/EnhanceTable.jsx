@@ -282,6 +282,7 @@ export default class EnhanceTable extends Component {
           >
             <Table.Column
               title="ID"
+              lock
               width={230}
               dataIndex="_id"
             />
@@ -320,6 +321,7 @@ export default class EnhanceTable extends Component {
             />
             <Table.Column
               title="操作"
+              lock="right"
               width={150}
               cell={this.renderOperations}
             />

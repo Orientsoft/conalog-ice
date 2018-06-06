@@ -82,6 +82,10 @@ export default class EnhanceTable extends Component {
     // 获取parser实例
     this.loop = setInterval(() => this.parserInstances.forEach(id => this.getparserInstance(id)), 3000);
   }
+  componentWillUnmount() {
+    clearInterval(this.loop);
+  }
+
   alert = (error) => {
     Dialog.alert({
       title: 'alert',
@@ -124,14 +128,6 @@ export default class EnhanceTable extends Component {
     });
   };
 
-  renderTitle = (value, index, record) => {
-    return (
-      <div style={styles.titleWrapper}>
-        <span style={styles.title}>{record.title}</span>
-      </div>
-    );
-  };
-
   editItem = (record) => {
     this.state.choosedparser = record;
     this.setState({
@@ -160,45 +156,6 @@ export default class EnhanceTable extends Component {
       },
     });
   };
-
-  startParser = (record) => {
-    let id = record._id;
-    const url = conalogUrl + '/parsers/' + id + '/instances'
-    let name = record.name
-    Dialog.confirm({
-      title: '启动',
-      content: '确认启动 ' + name + ' ?',
-      onOk: () => {
-        axios.get(url)
-          .then((response) => {
-          })
-          .catch((error) => {
-            this.alert(error);
-          });
-      },
-    });
-  };
-
-  checkLog = (record) => {
-
-  };
-
-  stopInstance = (record) => {
-    let id = record.parser;
-    const url = conalogUrl + '/parsers/' + id + '/instances'
-    Dialog.confirm({
-      title: '启动',
-      content: '确认停止 ' + id + ' ?',
-      onOk: () => {
-        axios.delete(url)
-          .then((response) => {
-          })
-          .catch((error) => {
-            this.alert(error);
-          });
-      },
-    });
-  }
 
   renderOperations = (value, index, record) => {
     return (
@@ -316,6 +273,41 @@ export default class EnhanceTable extends Component {
     });
   };
 
+  startParser = (record) => {
+    let id = record._id;
+    const url = conalogUrl + '/parsers/' + id + '/instances'
+    let name = record.name
+    Dialog.confirm({
+      title: '启动',
+      content: '确认启动 ' + name + ' ?',
+      onOk: () => {
+        axios.get(url)
+          .then((response) => {
+          })
+          .catch((error) => {
+            this.alert(error);
+          });
+      },
+    });
+  };
+
+  stopInstance = (record) => {
+    let id = record.parser;
+    const url = conalogUrl + '/parsers/' + id + '/instances'
+    Dialog.confirm({
+      title: '启动',
+      content: '确认停止 ' + id + ' ?',
+      onOk: () => {
+        axios.delete(url)
+          .then((response) => {
+          })
+          .catch((error) => {
+            this.alert(error);
+          });
+      },
+    });
+  }
+
   onStartAllParser = () => {
     const url = conalogUrl + '/parsers/instances';
     Dialog.confirm({
@@ -347,6 +339,10 @@ export default class EnhanceTable extends Component {
     });
   }
 
+  checkLog = (record) => {
+
+  };
+
   expandedRowRender = (record) => {
     let allInstances = this.state.allInstances;
     let data = allInstances.filter(item => item.parser === record._id) ? allInstances.filter(item => item.parser === record._id) : [];
@@ -358,6 +354,7 @@ export default class EnhanceTable extends Component {
     >
       <Table.Column
         title="parser"
+        // lock
         width={230}
         dataIndex="parser"
       />
@@ -447,6 +444,7 @@ export default class EnhanceTable extends Component {
       />
       <Table.Column
         title="操作"
+        // lock="right"
         width={200}
         cell={this.renderStop}
       />
@@ -483,16 +481,6 @@ export default class EnhanceTable extends Component {
               停止
             </Button>
           </div>
-          {/* <div style={styles.extraFilter}>
-            <Search
-              style={styles.search}
-              type="primary"
-              inputWidth={150}
-              placeholder="搜索"
-              searchText=""
-              onSearch={this.onSearch}
-            />
-          </div> */}
         </IceContainer>
         <IceContainer>
           <Table
@@ -506,6 +494,7 @@ export default class EnhanceTable extends Component {
           >
             <Table.Column
               title="ID"
+              // lock
               width={230}
               dataIndex="_id"
             />
@@ -564,12 +553,14 @@ export default class EnhanceTable extends Component {
             />
             <Table.Column
               title="运行"
+              lock="right"
               dataIndex="running"
               width={80}
               cell={this.renderrunning}
             />
             <Table.Column
               title="操作"
+              lock="right"
               width={200}
               cell={this.renderOperations}
             />
@@ -630,6 +621,6 @@ const styles = {
   },
   icon: {
     animation: 'change 3s linear infinite',
-    // display: 'inline - block',
+    display: 'inline - block',
   },
 };
