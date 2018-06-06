@@ -25,7 +25,7 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
         item.createdAt = moment(createdAt).format('YYYY-MM-DD HH:mm:ss');
         item.updatedAt = moment(updatedAt).format('YYYY-MM-DD HH:mm:ss');
       });
-      console.log('list', list)
+
       const newRes = {
         status: originResponse.status === 200 ? 'SUCCESS' : 'ERROR',
         data: {
@@ -285,7 +285,7 @@ export default class EnhanceTable extends Component {
       title: '启动',
       content: '确认启动 ' + name + ' ?',
       onOk: () => {
-        axios.get(url)
+        axios.post(url)
           .then((response) => {
             that.fetchData({
               page: 0,
@@ -321,6 +321,7 @@ export default class EnhanceTable extends Component {
   }
 
   onStartAllParser = () => {
+    const that = this;
     const url = conalogUrl + '/parsers/instances';
     Dialog.confirm({
       title: '启动',
@@ -328,6 +329,9 @@ export default class EnhanceTable extends Component {
       onOk: () => {
         axios.post(url)
           .then((response) => {
+            that.fetchData({
+              page: 0,
+            });
           })
           .catch((error) => {
             this.alert(error);
@@ -336,6 +340,7 @@ export default class EnhanceTable extends Component {
     });
   }
   onStopAllParser = () => {
+    const that = this;
     const url = conalogUrl + '/parsers/instances'
     Dialog.confirm({
       title: '启动',
@@ -343,6 +348,9 @@ export default class EnhanceTable extends Component {
       onOk: () => {
         axios.delete(url)
           .then((response) => {
+            that.fetchData({
+              page: 0,
+            });
           })
           .catch((error) => {
             this.alert(error);
@@ -518,7 +526,7 @@ export default class EnhanceTable extends Component {
             <Table.Column
               title="脚本"
               dataIndex="path"
-              width={85}
+              width={150}
             />
             <Table.Column
               title="参数"
