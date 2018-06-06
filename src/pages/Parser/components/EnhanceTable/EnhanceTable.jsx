@@ -5,10 +5,12 @@ import IceContainer from '@icedesign/container';
 import DataBinder from '@icedesign/data-binder';
 import IceLabel from '@icedesign/label';
 import { enquireScreen } from 'enquire-js';
-import Modal from '../Modal';
-import config from '../../../../config';
 import axios from 'axios';
 import moment from 'moment';
+import './EnhanceTable.scss';
+import Modal from '../Modal';
+import config from '../../../../config';
+
 
 const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toString()
 
@@ -23,6 +25,7 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
         item.createdAt = moment(createdAt).format('YYYY-MM-DD HH:mm:ss');
         item.updatedAt = moment(updatedAt).format('YYYY-MM-DD HH:mm:ss');
       });
+      console.log('list', list)
       const newRes = {
         status: originResponse.status === 200 ? 'SUCCESS' : 'ERROR',
         data: {
@@ -207,10 +210,10 @@ export default class EnhanceTable extends Component {
   }
 
   renderrunning = (record) => {
-    if (record) {
+    if (!record) {
       return <Icon type="set" />;
     } else {
-      return <div style={styles.icon}><Icon type="set" /></div>;
+      return <Icon type="set" style={styles.contentIcon} className="content-icon" />;
     }
   }
 
@@ -274,15 +277,19 @@ export default class EnhanceTable extends Component {
   };
 
   startParser = (record) => {
-    let id = record._id;
-    const url = conalogUrl + '/parsers/' + id + '/instances'
-    let name = record.name
+    const that = this;
+    const id = record._id;
+    const url = conalogUrl + '/parsers/' + id + '/instances';
+    const name = record.name;
     Dialog.confirm({
       title: '启动',
       content: '确认启动 ' + name + ' ?',
       onOk: () => {
         axios.get(url)
           .then((response) => {
+            that.fetchData({
+              page: 0,
+            });
           })
           .catch((error) => {
             this.alert(error);
@@ -292,7 +299,8 @@ export default class EnhanceTable extends Component {
   };
 
   stopInstance = (record) => {
-    let id = record.parser;
+    const that = this;
+    const id = record.parser;
     const url = conalogUrl + '/parsers/' + id + '/instances'
     Dialog.confirm({
       title: '启动',
@@ -300,6 +308,10 @@ export default class EnhanceTable extends Component {
       onOk: () => {
         axios.delete(url)
           .then((response) => {
+            console.log('hhhhh');
+            that.fetchData({
+              page: 0,
+            });
           })
           .catch((error) => {
             this.alert(error);
@@ -553,14 +565,14 @@ export default class EnhanceTable extends Component {
             />
             <Table.Column
               title="运行"
-              lock="right"
+              // lock="right"
               dataIndex="running"
               width={80}
               cell={this.renderrunning}
             />
             <Table.Column
               title="操作"
-              lock="right"
+              // lock="right"
               width={200}
               cell={this.renderOperations}
             />
@@ -618,9 +630,5 @@ const styles = {
   pagination: {
     textAlign: 'right',
     paddingTop: '26px',
-  },
-  icon: {
-    animation: 'change 3s linear infinite',
-    display: 'inline - block',
   },
 };
