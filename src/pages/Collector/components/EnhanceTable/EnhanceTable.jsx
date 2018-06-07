@@ -63,6 +63,8 @@ export default class EnhanceTable extends Component {
       choosedparser: {},
       allGroups: [],
       allInstances: [],
+      category: '',
+      page: 0,
     };
   }
 
@@ -489,17 +491,17 @@ export default class EnhanceTable extends Component {
         <IceContainer style={styles.card}>
           <div>
             <Button type="primary" onClick={this.onShowModal}>
-              添加解析
+              添加采集
             </Button>
           </div>
-          <div>
+          {/* <div>
             <Button type="primary" onClick={this.onStartAllParser}>
               启动
             </Button>
             <Button type="primary" onClick={this.onStopAllParser}>
               停止
             </Button>
-          </div>
+          </div> */}
         </IceContainer>
         <IceContainer>
           <Table

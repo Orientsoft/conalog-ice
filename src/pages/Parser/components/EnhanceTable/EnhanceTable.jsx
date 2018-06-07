@@ -1,6 +1,6 @@
 /* eslint no-underscore-dangle: 0 */
 import React, { Component } from 'react';
-import { Table, Pagination, Tab, Search, Button, Dialog, Icon } from '@icedesign/base';
+import { Table, Pagination, Tab, Search, Button, Dialog, Icon, Select } from '@icedesign/base';
 import IceContainer from '@icedesign/container';
 import DataBinder from '@icedesign/data-binder';
 import IceLabel from '@icedesign/label';
@@ -55,7 +55,10 @@ export default class EnhanceTable extends Component {
   constructor(props) {
     super(props);
 
-    this.queryCache = {};
+    this.queryCache = {
+      group: '',
+      page: 0,
+    };
     this.parserInstances = [];
     this.state = {
       // activeKey: 'solved',
@@ -72,6 +75,7 @@ export default class EnhanceTable extends Component {
     axios.get(url)
       .then((response) => {
         this.state.allGroups = response.data.groups;
+        this.state.allGroups.unshift({ name: '查看所有', _id: '' });
         this.setState({
           allGroups: this.state.allGroups,
         });
@@ -79,9 +83,7 @@ export default class EnhanceTable extends Component {
       .catch((error) => {
         this.alert(error);
       });
-    this.fetchData({
-      page: 0,
-    });
+    this.fetchData(this.queryCache);
     // 获取parser实例
     this.loop = setInterval(() => this.parserInstances.forEach(id => this.getparserInstance(id)), 3000);
   }
@@ -125,9 +127,9 @@ export default class EnhanceTable extends Component {
     });
   }
 
-  fetchData = (page) => {
+  fetchData = (params) => {
     this.props.updateBindingData('tableData', {
-      params: page,
+      params,
     });
   };
 
@@ -149,9 +151,7 @@ export default class EnhanceTable extends Component {
         const url = conalogUrl + '/parsers/' + id
         axios.delete(url)
           .then((response) => {
-            that.fetchData({
-              page: 0,
-            });
+            that.fetchData(that.queryCache);
           })
           .catch((error) => {
             this.alert(error);
@@ -218,9 +218,9 @@ export default class EnhanceTable extends Component {
   }
 
   changePage = (currentPage) => {
-    this.fetchData({
-      page: currentPage - 1,
-    });
+    this.queryCache.page = currentPage - 1;
+    console.log('page', this.queryCache);
+    this.fetchData(this.queryCache);
   };
 
   onShowModal = () => {
@@ -237,9 +237,7 @@ export default class EnhanceTable extends Component {
         that.setState({
           addVisible: false,
         });
-        that.fetchData({
-          page: 0,
-        });
+        that.fetchData(that.queryCache);
       })
       .catch((error) => {
         this.alert(error);
@@ -253,7 +251,7 @@ export default class EnhanceTable extends Component {
   };
 
   onEditOk = (data) => {
-    let id = this.state.choosedparser._id
+    let id = this.state.choosedparser._id;
     const that = this;
     const url = conalogUrl + '/parsers/' + id
     axios.put(url, data)
@@ -261,9 +259,7 @@ export default class EnhanceTable extends Component {
         that.setState({
           editVisible: false,
         });
-        that.fetchData({
-          page: 0,
-        });
+        that.fetchData(that.queryCache);
       })
       .catch((error) => {
         this.alert(error);
@@ -287,9 +283,7 @@ export default class EnhanceTable extends Component {
       onOk: () => {
         axios.post(url)
           .then((response) => {
-            that.fetchData({
-              page: 0,
-            });
+            that.fetchData(that.queryCache);
           })
           .catch((error) => {
             this.alert(error);
@@ -309,9 +303,7 @@ export default class EnhanceTable extends Component {
         axios.delete(url)
           .then((response) => {
             console.log('hhhhh');
-            that.fetchData({
-              page: 0,
-            });
+            that.fetchData(that.queryCache);
           })
           .catch((error) => {
             this.alert(error);
@@ -329,9 +321,7 @@ export default class EnhanceTable extends Component {
       onOk: () => {
         axios.post(url)
           .then((response) => {
-            that.fetchData({
-              page: 0,
-            });
+            that.fetchData(that.queryCache);
           })
           .catch((error) => {
             this.alert(error);
@@ -348,9 +338,7 @@ export default class EnhanceTable extends Component {
       onOk: () => {
         axios.delete(url)
           .then((response) => {
-            that.fetchData({
-              page: 0,
-            });
+            that.fetchData(that.queryCache);
           })
           .catch((error) => {
             this.alert(error);
@@ -361,6 +349,11 @@ export default class EnhanceTable extends Component {
 
   checkLog = (record) => {
 
+  };
+
+  chooseCategory = (value, option) => {
+    this.queryCache.group = value;
+    this.fetchData(this.queryCache);
   };
 
   expandedRowRender = (record) => {
@@ -483,6 +476,7 @@ export default class EnhanceTable extends Component {
   };
 
   render() {
+    const allgroups = this.state.allGroups;
     const tableData = this.props.bindingData.tableData;
     tableData.list.forEach((item, key) => item.id = key);
     return (
@@ -492,14 +486,18 @@ export default class EnhanceTable extends Component {
             <Button type="primary" onClick={this.onShowModal}>
               添加解析
             </Button>
-          </div>
-          <div>
             <Button type="primary" onClick={this.onStartAllParser}>
               启动
             </Button>
             <Button type="primary" onClick={this.onStopAllParser}>
               停止
             </Button>
+          </div>
+          <div>
+            <Select size="large" onChange={this.chooseCategory}>
+              {allgroups && allgroups.map((item, key) => (<Option key={item.name} value={item._id}>{item.name}</Option>))}
+            </Select>
+
           </div>
         </IceContainer>
         <IceContainer>
