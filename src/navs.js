@@ -3,7 +3,17 @@ const autoGenHeaderNavs = [];
 const autoGenAsideNavs = [
   { text: '主页', to: '/home', icon: 'home' },
   { text: '认证', to: '/cert', icon: 'yonghu' },
-  { text: '采集', to: '/collector', icon: 'copy' },
+  // { text: '采集', to: '/collector', icon: 'copy' },
+  {
+    text: '采集',
+    to: '/collector',
+    icon: 'copy',
+    children: [
+      { text: '主动采集', to: '/collector/active' },
+      { text: '被动采集', to: '/collector/passive' },
+      { text: '代理采集', to: '/collector/agent' },
+    ],
+  },
   { text: '解析', to: '/parser', icon: 'pin' },
   { text: '用户', to: '/user', icon: 'yonghu' },
   { text: '分组', to: '/group', icon: 'yonghu' },

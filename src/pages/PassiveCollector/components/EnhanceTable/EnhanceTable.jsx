@@ -3,8 +3,6 @@ import React, { Component } from 'react';
 import { Table, Pagination, Tab, Search, Button, Dialog, Icon } from '@icedesign/base';
 import IceContainer from '@icedesign/container';
 import DataBinder from '@icedesign/data-binder';
-import IceLabel from '@icedesign/label';
-import { enquireScreen } from 'enquire-js';
 import axios from 'axios';
 import moment from 'moment';
 import Modal from '../Modal';
@@ -17,6 +15,9 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
   tableData: {
     url: conalogUrl + '/collectors',
     method: 'get',
+    params: {
+      category: 1,
+    },
     responseFormatter: (responseHandler, res, originResponse) => {
       let list = res.collectors;
       list.forEach((item) => {
@@ -513,43 +514,21 @@ export default class EnhanceTable extends Component {
             expandedRowRender={this.expandedRowRender}
             onExpandedChange={this.onExpandedChange}
           >
-            <Table.Column
+            {/* <Table.Column
               title="ID"
               // lock
               width={230}
               dataIndex="_id"
-            />
+            /> */}
             <Table.Column
               title="名字"
               dataIndex="name"
               width={150}
             />
             <Table.Column
-              title="脚本"
-              dataIndex="path"
+              title="编码"
+              dataIndex="encoding"
               width={150}
-            />
-            <Table.Column
-              title="参数"
-              dataIndex="parameter"
-              width={85}
-            />
-            <Table.Column
-              title="数据输入通道类型"
-              dataIndex="input.type"
-              width={150}
-              cell={this.renderchannel}
-            />
-            <Table.Column
-              title="数据输入通道名"
-              dataIndex="input.name"
-              width={150}
-            />
-            <Table.Column
-              title="数据输出通道类型"
-              dataIndex="output.type"
-              width={150}
-              cell={this.renderchannel}
             />
             <Table.Column
               title="数据输出通道名"
@@ -557,8 +536,28 @@ export default class EnhanceTable extends Component {
               width={150}
             />
             <Table.Column
+              title="数据输出通道类型"
+              dataIndex="output.type"
+              width={150}
+            />
+            {/* <Table.Column
+              title="cert"
+              dataIndex="worker.cert"
+              width={150}
+            /> */}
+            <Table.Column
+              title="路径"
+              dataIndex="worker.path"
+              width={150}
+            />
+            <Table.Column
+              title="参数"
+              dataIndex="worker.path"
+              width={150}
+            />
+            <Table.Column
               title="分组"
-              dataIndex="group"
+              dataIndex="category"
               width={150}
               cell={this.rendergroup}
             />

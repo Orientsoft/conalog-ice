@@ -3,12 +3,11 @@ import React, { Component } from 'react';
 import { Table, Pagination, Tab, Search, Button, Dialog, Icon } from '@icedesign/base';
 import IceContainer from '@icedesign/container';
 import DataBinder from '@icedesign/data-binder';
-import IceLabel from '@icedesign/label';
-import { enquireScreen } from 'enquire-js';
 import axios from 'axios';
 import moment from 'moment';
 import Modal from '../Modal';
 import config from '../../../../config';
+import './EnhanceTable.scss';
 
 
 const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toString()
@@ -17,6 +16,10 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
   tableData: {
     url: conalogUrl + '/collectors',
     method: 'get',
+    params: {
+      category: 2,
+      embed: true,
+    },
     responseFormatter: (responseHandler, res, originResponse) => {
       let list = res.collectors;
       list.forEach((item) => {
@@ -24,7 +27,6 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
         item.createdAt = moment(createdAt).format('YYYY-MM-DD HH:mm:ss');
         item.updatedAt = moment(updatedAt).format('YYYY-MM-DD HH:mm:ss');
       });
-      console.log('list', list)
       const newRes = {
         status: originResponse.status === 200 ? 'SUCCESS' : 'ERROR',
         data: {
@@ -55,13 +57,12 @@ export default class EnhanceTable extends Component {
     super(props);
 
     this.queryCache = {};
-    this.parserInstances = [];
+    this.collectorInstances = [];
     this.state = {
       // activeKey: 'solved',
       addVisible: false,
       editVisible: false,
-      choosedparser: {},
-      allGroups: [],
+      choosedcollector: {},
       allInstances: [],
       category: '',
       page: 0,
@@ -69,22 +70,11 @@ export default class EnhanceTable extends Component {
   }
 
   componentDidMount() {
-    const url = conalogUrl + '/groups'
-    axios.get(url)
-      .then((response) => {
-        this.state.allGroups = response.data.groups;
-        this.setState({
-          allGroups: this.state.allGroups,
-        });
-      })
-      .catch((error) => {
-        this.alert(error);
-      });
     this.fetchData({
       page: 0,
     });
-    // 获取parser实例
-    this.loop = setInterval(() => this.parserInstances.forEach(id => this.getparserInstance(id)), 3000);
+    // 获取collector实例
+    this.loop = setInterval(() => this.collectorInstances.forEach(id => this.getcollectorInstance(id)), 3000);
   }
   componentWillUnmount() {
     clearInterval(this.loop);
@@ -98,9 +88,9 @@ export default class EnhanceTable extends Component {
     });
   }
 
-  getparserInstance = (id) => {
+  getcollectorInstance = (id) => {
     const that = this;
-    const url = conalogUrl + '/parsers/' + id + '/instances';
+    const url = conalogUrl + '/collectors/' + id + '/instances';
     axios.get(url)
       .then((response) => {
         this.dealInstance(response.data);
@@ -133,7 +123,7 @@ export default class EnhanceTable extends Component {
   };
 
   editItem = (record) => {
-    this.state.choosedparser = record;
+    this.state.choosedcollector = record;
     this.setState({
       editVisible: true,
     });
@@ -147,7 +137,7 @@ export default class EnhanceTable extends Component {
       content: '确定删除用户  ' + name + '?',
       onOk: () => {
         const that = this;
-        const url = conalogUrl + '/parsers/' + id
+        const url = conalogUrl + '/collectors/' + id
         axios.delete(url)
           .then((response) => {
             that.fetchData({
@@ -170,7 +160,7 @@ export default class EnhanceTable extends Component {
         <a onClick={() => { this.deleteItem(record); }} style={styles.operation} >
           删除
         </a>
-        <a onClick={() => { this.startParser(record); }} style={styles.operation} >
+        <a onClick={() => { this.startInstance(record); }} style={styles.operation} >
           启动
         </a>
         <a onClick={() => { this.checkLog(record); }} style={styles.operation} >
@@ -188,16 +178,6 @@ export default class EnhanceTable extends Component {
         </a>
       </div>
     );
-  }
-
-  rendergroup = (record) => {
-    let d = '';
-    this.state.allGroups.filter((item) => {
-      if (item._id === record) {
-        d = item.name;
-      }
-    });
-    return d;
   }
 
   renderchannel = (record) => {
@@ -218,6 +198,11 @@ export default class EnhanceTable extends Component {
     }
   }
 
+  rendercert = (record) => {
+    let cert = record.username + '@' + record.host + ':' + record.port;
+    return cert
+  }
+
   changePage = (currentPage) => {
     this.fetchData({
       page: currentPage - 1,
@@ -232,7 +217,7 @@ export default class EnhanceTable extends Component {
 
   onAddOk = (data) => {
     const that = this;
-    const url = conalogUrl + '/parsers'
+    const url = conalogUrl + '/collectors'
     axios.post(url, data)
       .then((response) => {
         that.setState({
@@ -254,9 +239,9 @@ export default class EnhanceTable extends Component {
   };
 
   onEditOk = (data) => {
-    let id = this.state.choosedparser._id
+    let id = this.state.choosedCollector._id
     const that = this;
-    const url = conalogUrl + '/parsers/' + id
+    const url = conalogUrl + '/collectors/' + id
     axios.put(url, data)
       .then((response) => {
         that.setState({
@@ -277,16 +262,16 @@ export default class EnhanceTable extends Component {
     });
   };
 
-  startParser = (record) => {
+  startInstance = (record) => {
     const that = this;
     const id = record._id;
-    const url = conalogUrl + '/parsers/' + id + '/instances';
+    const url = conalogUrl + '/collectors/instances/' + id;
     const name = record.name;
     Dialog.confirm({
       title: '启动',
       content: '确认启动 ' + name + ' ?',
       onOk: () => {
-        axios.get(url)
+        axios.post(url)
           .then((response) => {
             that.fetchData({
               page: 0,
@@ -301,51 +286,12 @@ export default class EnhanceTable extends Component {
 
   stopInstance = (record) => {
     const that = this;
-    const id = record.parser;
-    const url = conalogUrl + '/parsers/' + id + '/instances'
+    const id = record._id;
+    let name = record.name
+    const url = conalogUrl + '/collectors/instances/' + id
     Dialog.confirm({
       title: '启动',
-      content: '确认停止 ' + id + ' ?',
-      onOk: () => {
-        axios.delete(url)
-          .then((response) => {
-            console.log('hhhhh');
-            that.fetchData({
-              page: 0,
-            });
-          })
-          .catch((error) => {
-            this.alert(error);
-          });
-      },
-    });
-  }
-
-  onStartAllParser = () => {
-    const that = this;
-    const url = conalogUrl + '/parsers/instances';
-    Dialog.confirm({
-      title: '启动',
-      content: '确认启动所有parser?',
-      onOk: () => {
-        axios.post(url)
-          .then((response) => {
-            that.fetchData({
-              page: 0,
-            });
-          })
-          .catch((error) => {
-            this.alert(error);
-          });
-      },
-    });
-  }
-  onStopAllParser = () => {
-    const that = this;
-    const url = conalogUrl + '/parsers/instances'
-    Dialog.confirm({
-      title: '启动',
-      content: '确认停止所有parser?',
+      content: '确认停止 ' + name + ' ?',
       onOk: () => {
         axios.delete(url)
           .then((response) => {
@@ -374,26 +320,8 @@ export default class EnhanceTable extends Component {
       hasBorder={false}
     >
       <Table.Column
-        title="parser"
-        // lock
-        width={230}
-        dataIndex="parser"
-      />
-      <Table.Column
-        title="进程号"
-        dataIndex="status.pid"
-        width={150}
-        cell={(item) => {
-          let pid = '--';
-          if (item) {
-            pid = item;
-          }
-          return pid;
-        }}
-      />
-      <Table.Column
-        title="更新时间"
-        dataIndex="status.uptime"
+        title="时间"
+        dataIndex="ts"
         width={85}
         cell={(item) => {
           let uptime = '--';
@@ -404,32 +332,8 @@ export default class EnhanceTable extends Component {
         }}
       />
       <Table.Column
-        title="重启"
-        dataIndex="status.restart"
-        width={85}
-        cell={(item) => {
-          let restart = '--';
-          if (item) {
-            restart = item;
-          }
-          return restart;
-        }}
-      />
-      <Table.Column
-        title="状态"
-        dataIndex="status.status"
-        width={150}
-        cell={(item) => {
-          let status = '--';
-          if (item) {
-            status = item;
-          }
-          return status;
-        }}
-      />
-      <Table.Column
         title="日志条数"
-        dataIndex="lastActivity.count"
+        dataIndex="count"
         width={150}
         cell={(item) => {
           let count = '--';
@@ -452,15 +356,15 @@ export default class EnhanceTable extends Component {
         }}
       />
       <Table.Column
-        title="日期"
-        dataIndex="lastActivity.date"
+        title="error"
+        dataIndex="error"
         width={150}
         cell={(item) => {
-          let date = '--';
+          let result = '--';
           if (item) {
-            date = moment(item).format('YYYY-MM-DD HH:mm:ss');
+            result = item;
           }
-          return date;
+          return result;
         }}
       />
       <Table.Column
@@ -476,10 +380,10 @@ export default class EnhanceTable extends Component {
   onExpandedChange = (expandedRowKeys, currentRowKey, expanded, currentRecord) => {
     let id = currentRecord._id;
     if (expanded) {
-      this.parserInstances.push(id);
-      this.getparserInstance(id);
+      this.collectorInstances.push(id);
+      this.getcollectorInstance(id);
     } else {
-      this.parserInstances = this.parserInstances.filter(item => item !== id);
+      this.collectorInstances = this.collectorInstances.filter(item => item !== id);
     }
   };
 
@@ -494,14 +398,6 @@ export default class EnhanceTable extends Component {
               添加采集
             </Button>
           </div>
-          {/* <div>
-            <Button type="primary" onClick={this.onStartAllParser}>
-              启动
-            </Button>
-            <Button type="primary" onClick={this.onStopAllParser}>
-              停止
-            </Button>
-          </div> */}
         </IceContainer>
         <IceContainer>
           <Table
@@ -514,35 +410,24 @@ export default class EnhanceTable extends Component {
             onExpandedChange={this.onExpandedChange}
           >
             <Table.Column
-              title="ID"
-              // lock
-              width={230}
-              dataIndex="_id"
-            />
-            <Table.Column
               title="名字"
               dataIndex="name"
               width={150}
             />
             <Table.Column
-              title="脚本"
-              dataIndex="path"
-              width={150}
+              title="认证"
+              dataIndex="cert"
+              width={200}
+              cell={this.rendercert}
             />
             <Table.Column
               title="参数"
-              dataIndex="parameter"
+              dataIndex="worker.parameter"
               width={85}
             />
             <Table.Column
-              title="数据输入通道类型"
-              dataIndex="input.type"
-              width={150}
-              cell={this.renderchannel}
-            />
-            <Table.Column
-              title="数据输入通道名"
-              dataIndex="input.name"
+              title="编码"
+              dataIndex="encoding"
               width={150}
             />
             <Table.Column
@@ -558,9 +443,8 @@ export default class EnhanceTable extends Component {
             />
             <Table.Column
               title="分组"
-              dataIndex="group"
+              dataIndex="group.name"
               width={150}
-              cell={this.rendergroup}
             />
             <Table.Column
               title="创建"
@@ -596,7 +480,7 @@ export default class EnhanceTable extends Component {
             />
           </div>
         </IceContainer>
-        {this.state.editVisible && <Modal data={this.state.choosedparser} onOk={this.onEditOk} onCancel={this.onEditCancel} />}
+        {this.state.editVisible && <Modal data={this.state.choosedcollector} onOk={this.onEditOk} onCancel={this.onEditCancel} />}
         {this.state.addVisible && <Modal onOk={this.onAddOk} onCancel={this.onAddCancel} />}
       </div>
     );
