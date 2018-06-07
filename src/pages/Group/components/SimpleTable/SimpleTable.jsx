@@ -261,7 +261,7 @@ export default class SimpleTable extends Component {
             />
             <Table.Column
               title="操作"
-              // dataIndex="operation"
+              lock="right"
               width={150}
               cell={this.renderOperations}
             />

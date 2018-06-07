@@ -3,8 +3,6 @@ import React, { Component } from 'react';
 import { Table, Pagination, Tab, Search, Button, Dialog, Icon, Select } from '@icedesign/base';
 import IceContainer from '@icedesign/container';
 import DataBinder from '@icedesign/data-binder';
-import IceLabel from '@icedesign/label';
-import { enquireScreen } from 'enquire-js';
 import axios from 'axios';
 import moment from 'moment';
 import './EnhanceTable.scss';
@@ -353,6 +351,7 @@ export default class EnhanceTable extends Component {
 
   chooseCategory = (value, option) => {
     this.queryCache.group = value;
+    this.queryCache.page = 0;
     this.fetchData(this.queryCache);
   };
 
@@ -494,7 +493,7 @@ export default class EnhanceTable extends Component {
             </Button>
           </div>
           <div>
-            <Select size="large" onChange={this.chooseCategory}>
+            <Select size="large" onChange={this.chooseCategory} placeholder="请选择分组" style={{ width: 200 }}>
               {allgroups && allgroups.map((item, key) => (<Option key={item.name} value={item._id}>{item.name}</Option>))}
             </Select>
 
