@@ -103,7 +103,6 @@ export default class SimpleFormDialog extends Component {
         console.log('Errors in form!!!');
         return;
       }
-      console.log(values)
       const data = {
         name: values.name,
         encoding: values.encoding,

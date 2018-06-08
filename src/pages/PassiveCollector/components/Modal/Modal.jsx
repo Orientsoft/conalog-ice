@@ -5,6 +5,7 @@ import {
   FormBinder as IceFormBinder,
   FormError as IceFormError,
 } from '@icedesign/form-binder';
+import axios from 'axios';
 import config from '../../../../config';
 
 const { Item: FormItem } = Form;
@@ -25,6 +26,7 @@ const defaultValue = {
     path: '',
     parameter: '',
   },
+  group: '',
 };
 
 export default class SimpleFormDialog extends Component {
@@ -37,22 +39,54 @@ export default class SimpleFormDialog extends Component {
       value: this.props.data || defaultValue,
       title: this.props.data ? '修改' : '添加',
       allGroups: [],
-      scripts: [],
+      allCerts: [],
     };
   }
 
   componentWillMount() {
+    const url = conalogUrl + '/certs'
+    //获取certs
+    axios.get(url)
+      .then((response) => {
+        this.state.allCerts = response.data.certs;
+        this.setState({
+          allCerts: this.state.allCerts,
+        });
+      })
+      .catch((error) => {
+        Dialog.alert({
+          title: 'alert',
+          content: error.response.data.message ? error.response.data.message : error.response.data,
+          onOk: () => { },
+        });
+      });
+    const groupurl = conalogUrl + '/groups'
+    //获取分组
+    axios.get(groupurl)
+      .then((response) => {
+        this.state.allGroups = response.data.groups;
+        this.setState({
+          allGroups: this.state.allGroups,
+        });
+      })
+      .catch((error) => {
+        Dialog.alert({
+          title: 'alert',
+          content: error.response.data.message ? error.response.data.message : error.response.data,
+          onOk: () => { },
+        });
+      });
     const value = this.state.value;
     // 编辑时初始化form
     this.field.setValues({
       name: value.name,
       encoding: value.encoding,
-      cert: value.cert.user ? value.cert.user + '@' + value.cert.host + value.cert.port : '',
+      cert: value.cert.username ? value.cert._id : '',
       parameter: value.worker.parameter,
       path: value.worker.path,
-      category: value.category,
       outputname: value.output.name,
       outputtype: value.output.type,
+      group: value.group._id,
     });
   }
 
@@ -70,25 +104,26 @@ export default class SimpleFormDialog extends Component {
       }
       const data = {
         name: values.name,
-        path: values.path,
-        input: {
-          type: values.inputtype,
-          name: values.inputname,
-        },
+        encoding: values.encoding,
+        cert: values.cert,
         output: {
           type: values.outputtype,
           name: values.outputname,
         },
-        parameter: values.parameter || '',
+        category: 1,
+        running: false,
         group: values.group,
+        worker: {
+          path: values.path,
+          parameter: values.parameter,
+        },
       };
       this.props.onOk(data);
     });
   };
 
   render() {
-    const allgroups = this.state.allGroups;
-    const scripts = this.state.scripts;
+    const { allCerts, allGroups } = this.state;
     const simpleFormDialog = {
       ...styles.simpleFormDialog,
     };
@@ -132,14 +167,26 @@ export default class SimpleFormDialog extends Component {
           <FormItem label="编码：" {...formItemLayout} hasFeedback >
             <Select
               style={{ width: '100%' }}
-              {...init('inputtype', {
+              {...init('encoding', {
                 rules: [
-                  { required: true, message: '输入数据通道' },
+                  { required: true, message: '庆选择编码' },
                 ],
               })}
             >
-              <li value={0} key="REDIS_CHANNEL">REDIS_CHANNEL</li>
-              <li value={1} key="NSQ_QUEUE">NSQ_QUEUE</li>
+              <li key="UTF-8" value="UTF-8">UTF-8</li>
+              <li key="ASCII" value="ASCII">ASCII</li>
+              <li key="GB2312" value="GB2312">GB2312</li>
+              <li key="GBK" value="GBK">GBK</li>
+              <li key="GB18030" value="GB18030">GB18030</li>
+              <li key="Big5" value="Big5">Big5</li>
+              <li key="Big5-HKSCS" value="Big5-HKSCS">Big5-HKSCS</li>
+              <li key="Shift_JIS" value="Shift_JIS">Shift_JIS</li>
+              <li key="EUC-JP" value="EUC-JP">EUC-JP</li>
+              <li key="UTF-16LE" value="UTF-16LE">UTF-16LE</li>
+              <li key="UTF-16BE" value="UTF-16BE">UTF-16BE</li>
+              <li key="binary" value="binary">binary</li>
+              <li key="base64" value="base64">base64</li>
+              <li key="hex" value="hex">hex</li>
             </Select>
           </FormItem>
 
@@ -149,10 +196,11 @@ export default class SimpleFormDialog extends Component {
               hasLimitHint
               {...init('cert', {
                 rules: [
-                  { required: true, trigger: 'onBlur', message: '请填写参数' },
+                  { required: true, trigger: 'onBlur', message: '请选择认证' },
                 ],
               })}
             >
+              {allCerts && allCerts.map((item, key) => (<li key={item.name} value={item._id}>{item.username + '@' + item.host + ':' + item.port}</li>))}
             </Select>
           </FormItem>
 
@@ -161,7 +209,7 @@ export default class SimpleFormDialog extends Component {
               hasLimitHint
               {...init('path', {
                 rules: [
-                  { required: true, trigger: 'onBlur', message: '请填写名字' },
+                  { required: true, trigger: 'onBlur', message: '请填写路径' },
                 ],
               })}
             />
@@ -172,7 +220,7 @@ export default class SimpleFormDialog extends Component {
               hasLimitHint
               {...init('parameter', {
                 rules: [
-                  { required: true, trigger: 'onBlur', message: '请填写名字' },
+                  { required: true, trigger: 'onBlur', message: '请填写参数' },
                 ],
               })}
             />
@@ -183,7 +231,7 @@ export default class SimpleFormDialog extends Component {
               style={{ width: '100%' }}
               {...init('outputtype', {
                 rules: [
-                  { required: true, message: '输出数据通道' },
+                  { required: true, message: '请选择输出数据通道' },
                 ],
               })}
             >
@@ -203,7 +251,7 @@ export default class SimpleFormDialog extends Component {
             />
           </FormItem>
 
-          {/* <FormItem label="分组：" {...formItemLayout} hasFeedback>
+          <FormItem label="分组：" {...formItemLayout} hasFeedback>
             <Select
               style={{ width: '100%' }}
               // htmlType="type"
@@ -213,9 +261,9 @@ export default class SimpleFormDialog extends Component {
                 ],
               })}
             >
-              {allgroups && allgroups.map((item, key) => (<li key={item.name} value={item._id}>{item.name}</li>))}
+              {allGroups && allGroups.map((item, key) => (<li key={item.name} value={item._id}>{item.name}</li>))}
             </Select>
-          </FormItem> */}
+          </FormItem>
         </Form>
       </Dialog>
     );

@@ -1,6 +1,6 @@
 /* eslint no-underscore-dangle: 0 */
 import React, { Component } from 'react';
-import { Table, Pagination, Tab, Search, Button, Dialog, Icon } from '@icedesign/base';
+import { Table, Pagination, Tab, Search, Button, Dialog, Icon, Select } from '@icedesign/base';
 import IceContainer from '@icedesign/container';
 import DataBinder from '@icedesign/data-binder';
 import axios from 'axios';
@@ -56,25 +56,37 @@ export default class EnhanceTable extends Component {
   constructor(props) {
     super(props);
 
-    this.queryCache = {};
+    this.queryCache = {
+      group: '',
+      page: 0,
+    };
     this.collectorInstances = [];
     this.state = {
       // activeKey: 'solved',
       addVisible: false,
       editVisible: false,
-      choosedcollector: {},
+      choosedCollector: {},
       allInstances: [],
-      category: '',
-      page: 0,
+      allgroups: [],
     };
   }
 
   componentDidMount() {
-    this.fetchData({
-      page: 0,
-    });
+    const url = conalogUrl + '/groups'
+    axios.get(url)
+      .then((response) => {
+        this.state.allgroups = response.data.groups;
+        this.state.allgroups.unshift({ name: '查看所有', _id: '' });
+        this.setState({
+          allgroups: this.state.allgroups,
+        });
+      })
+      .catch((error) => {
+        this.alert(error);
+      });
+    this.fetchData(this.queryCache);
     // 获取collector实例
-    this.loop = setInterval(() => this.collectorInstances.forEach(id => this.getcollectorInstance(id)), 3000);
+    this.loop = setInterval(() => this.collectorInstances.forEach(id => this.getcollectorInstance(id)), 5000);
   }
   componentWillUnmount() {
     clearInterval(this.loop);
@@ -116,14 +128,14 @@ export default class EnhanceTable extends Component {
     });
   }
 
-  fetchData = (page) => {
+  fetchData = (params) => {
     this.props.updateBindingData('tableData', {
-      params: page,
+      params,
     });
   };
 
   editItem = (record) => {
-    this.state.choosedcollector = record;
+    this.state.choosedCollector = record;
     this.setState({
       editVisible: true,
     });
@@ -140,9 +152,7 @@ export default class EnhanceTable extends Component {
         const url = conalogUrl + '/collectors/' + id
         axios.delete(url)
           .then((response) => {
-            that.fetchData({
-              page: 0,
-            });
+            that.fetchData(that.queryCache);
           })
           .catch((error) => {
             this.alert(error);
@@ -203,10 +213,17 @@ export default class EnhanceTable extends Component {
     return cert
   }
 
+  rendertype = (record) => {
+    let type = '';
+    if (record === 0) {
+      type = 'FILEBEAT';
+    }
+    return type;
+  }
+
   changePage = (currentPage) => {
-    this.fetchData({
-      page: currentPage - 1,
-    });
+    this.queryCache.page = currentPage - 1;
+    this.fetchData(this.queryCache);
   };
 
   onShowModal = () => {
@@ -223,9 +240,7 @@ export default class EnhanceTable extends Component {
         that.setState({
           addVisible: false,
         });
-        that.fetchData({
-          page: 0,
-        });
+        that.fetchData(that.queryCache);
       })
       .catch((error) => {
         this.alert(error);
@@ -239,7 +254,7 @@ export default class EnhanceTable extends Component {
   };
 
   onEditOk = (data) => {
-    let id = this.state.choosedCollector._id
+    let id = this.state.choosedCollector._id;
     const that = this;
     const url = conalogUrl + '/collectors/' + id
     axios.put(url, data)
@@ -247,9 +262,7 @@ export default class EnhanceTable extends Component {
         that.setState({
           editVisible: false,
         });
-        that.fetchData({
-          page: 0,
-        });
+        that.fetchData(that.queryCache);
       })
       .catch((error) => {
         this.alert(error);
@@ -273,9 +286,7 @@ export default class EnhanceTable extends Component {
       onOk: () => {
         axios.post(url)
           .then((response) => {
-            that.fetchData({
-              page: 0,
-            });
+            that.fetchData(that.queryCache);
           })
           .catch((error) => {
             this.alert(error);
@@ -295,9 +306,7 @@ export default class EnhanceTable extends Component {
       onOk: () => {
         axios.delete(url)
           .then((response) => {
-            that.fetchData({
-              page: 0,
-            });
+            that.fetchData(that.queryCache);
           })
           .catch((error) => {
             this.alert(error);
@@ -309,6 +318,12 @@ export default class EnhanceTable extends Component {
   checkLog = (record) => {
 
   };
+
+  chooseGroup = (value, option) => {
+    this.queryCache.group = value;
+    this.queryCache.page = 0;
+    this.fetchData(this.queryCache);
+  }
 
   expandedRowRender = (record) => {
     let allInstances = this.state.allInstances;
@@ -388,6 +403,7 @@ export default class EnhanceTable extends Component {
   };
 
   render() {
+    const allgroups = this.state.allgroups;
     const tableData = this.props.bindingData.tableData;
     tableData.list.forEach((item, key) => item.id = key);
     return (
@@ -397,6 +413,11 @@ export default class EnhanceTable extends Component {
             <Button type="primary" onClick={this.onShowModal}>
               添加采集
             </Button>
+          </div>
+          <div>
+            <Select size="large" onChange={this.chooseGroup} placeholder="请选择分组" style={{ width: 200 }}>
+              {allgroups && allgroups.map((item, key) => (<Option key={item.name} value={item._id}>{item.name}</Option>))}
+            </Select>
           </div>
         </IceContainer>
         <IceContainer>
@@ -410,6 +431,11 @@ export default class EnhanceTable extends Component {
             onExpandedChange={this.onExpandedChange}
           >
             <Table.Column
+              title="ID"
+              dataIndex="_id"
+              width={230}
+            />
+            <Table.Column
               title="名字"
               dataIndex="name"
               width={150}
@@ -421,7 +447,13 @@ export default class EnhanceTable extends Component {
               cell={this.rendercert}
             />
             <Table.Column
-              title="参数"
+              title="采集类型"
+              dataIndex="worker.type"
+              width={85}
+              cell={this.rendertype}
+            />
+            <Table.Column
+              title="采集参数"
               dataIndex="worker.parameter"
               width={85}
             />
@@ -480,7 +512,7 @@ export default class EnhanceTable extends Component {
             />
           </div>
         </IceContainer>
-        {this.state.editVisible && <Modal data={this.state.choosedcollector} onOk={this.onEditOk} onCancel={this.onEditCancel} />}
+        {this.state.editVisible && <Modal data={this.state.choosedCollector} onOk={this.onEditOk} onCancel={this.onEditCancel} />}
         {this.state.addVisible && <Modal onOk={this.onAddOk} onCancel={this.onAddCancel} />}
       </div>
     );
