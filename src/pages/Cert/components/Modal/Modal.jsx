@@ -90,21 +90,21 @@ export default class SimpleFormDialog extends Component {
       this.setState({
         keyorpass: this.state.keyorpass,
       });
+      this.field.setValues({
+        key: '',
+      });
     } else if (value === 1) {
       this.state.keyorpass.require = false;
       this.state.keyorpass.disable = true;
       this.setState({
         keyorpass: this.state.keyorpass,
       });
+      this.field.setValues({
+        password: '',
+      });
     }
     callback();
   }
-
-  // onFormChange = (value) => {
-  //   this.setState({
-  //     value,
-  //   });
-  // };
 
   onOk = () => {
     this.field.validate((errors, values) => {

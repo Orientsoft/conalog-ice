@@ -1,12 +1,13 @@
 /* eslint no-underscore-dangle: 0 */
 import React, { Component } from 'react';
-import { Table, Pagination, Tab, Search, Button, Dialog, Icon } from '@icedesign/base';
+import { Table, Pagination, Tab, Search, Button, Dialog, Icon, Select, TimePicker } from '@icedesign/base';
 import IceContainer from '@icedesign/container';
 import DataBinder from '@icedesign/data-binder';
 import axios from 'axios';
 import moment from 'moment';
 import Modal from '../Modal';
 import config from '../../../../config';
+import './EnhanceTable.scss';
 
 
 const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toString()
@@ -17,15 +18,16 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
     method: 'get',
     params: {
       category: 0,
+      embed: true,
     },
     responseFormatter: (responseHandler, res, originResponse) => {
       let list = res.collectors;
+      console.log(list)
       list.forEach((item) => {
         const { createdAt, updatedAt } = item;
         item.createdAt = moment(createdAt).format('YYYY-MM-DD HH:mm:ss');
         item.updatedAt = moment(updatedAt).format('YYYY-MM-DD HH:mm:ss');
       });
-      console.log('list', list)
       const newRes = {
         status: originResponse.status === 200 ? 'SUCCESS' : 'ERROR',
         data: {
@@ -55,17 +57,18 @@ export default class EnhanceTable extends Component {
   constructor(props) {
     super(props);
 
-    this.queryCache = {};
-    this.parserInstances = [];
+    this.queryCache = {
+      group: '',
+      page: 0,
+    };
+    this.collectorInstances = [];
     this.state = {
       // activeKey: 'solved',
       addVisible: false,
       editVisible: false,
-      choosedparser: {},
-      allGroups: [],
+      choosedCollector: {},
       allInstances: [],
-      category: '',
-      page: 0,
+      allgroups: [],
     };
   }
 
@@ -73,20 +76,20 @@ export default class EnhanceTable extends Component {
     const url = conalogUrl + '/groups'
     axios.get(url)
       .then((response) => {
-        this.state.allGroups = response.data.groups;
+        this.state.allgroups = response.data.groups;
+        this.state.allgroups.unshift({ name: '查看所有', _id: '' });
         this.setState({
-          allGroups: this.state.allGroups,
+          allgroups: this.state.allgroups,
         });
       })
       .catch((error) => {
         this.alert(error);
       });
-    this.fetchData({
-      page: 0,
-    });
-    // 获取parser实例
-    this.loop = setInterval(() => this.parserInstances.forEach(id => this.getparserInstance(id)), 3000);
+    this.fetchData(this.queryCache);
+    // 获取collector实例
+    this.loop = setInterval(() => this.collectorInstances.forEach(id => this.getcollectorInstance(id)), 5000);
   }
+
   componentWillUnmount() {
     clearInterval(this.loop);
   }
@@ -97,11 +100,11 @@ export default class EnhanceTable extends Component {
       content: error.response.data.message ? error.response.data.message : error.response.data,
       onOk: () => { },
     });
-  }
+  };
 
-  getparserInstance = (id) => {
+  getcollectorInstance = (id) => {
     const that = this;
-    const url = conalogUrl + '/parsers/' + id + '/instances';
+    const url = conalogUrl + '/collectors/' + id + '/instances';
     axios.get(url)
       .then((response) => {
         this.dealInstance(response.data);
@@ -125,16 +128,20 @@ export default class EnhanceTable extends Component {
     this.setState({
       allInstances: this.state.allInstances,
     });
-  }
+  };
 
-  fetchData = (page) => {
+  fetchData = (params) => {
     this.props.updateBindingData('tableData', {
-      params: page,
+      params,
     });
   };
 
   editItem = (record) => {
-    this.state.choosedparser = record;
+    this.state.choosedCollector = record;
+    let interval = this.state.choosedCollector.worker.interval;
+    if (interval) {
+      this.state.choosedCollector.worker.interval = new Date(interval);
+    }
     this.setState({
       editVisible: true,
     });
@@ -148,12 +155,10 @@ export default class EnhanceTable extends Component {
       content: '确定删除用户  ' + name + '?',
       onOk: () => {
         const that = this;
-        const url = conalogUrl + '/parsers/' + id
+        const url = conalogUrl + '/collectors/' + id
         axios.delete(url)
           .then((response) => {
-            that.fetchData({
-              page: 0,
-            });
+            that.fetchData(that.queryCache);
           })
           .catch((error) => {
             this.alert(error);
@@ -171,7 +176,7 @@ export default class EnhanceTable extends Component {
         <a onClick={() => { this.deleteItem(record); }} style={styles.operation} >
           删除
         </a>
-        <a onClick={() => { this.startParser(record); }} style={styles.operation} >
+        <a onClick={() => { this.startInstance(record); }} style={styles.operation} >
           启动
         </a>
         <a onClick={() => { this.checkLog(record); }} style={styles.operation} >
@@ -189,17 +194,7 @@ export default class EnhanceTable extends Component {
         </a>
       </div>
     );
-  }
-
-  rendergroup = (record) => {
-    let d = '';
-    this.state.allGroups.filter((item) => {
-      if (item._id === record) {
-        d = item.name;
-      }
-    });
-    return d;
-  }
+  };
 
   renderchannel = (record) => {
     let d = '';
@@ -209,7 +204,7 @@ export default class EnhanceTable extends Component {
       d = 'NSQ_QUEUE';
     }
     return d;
-  }
+  };
 
   renderrunning = (record) => {
     if (!record) {
@@ -217,12 +212,35 @@ export default class EnhanceTable extends Component {
     } else {
       return <Icon type="set" style={styles.contentIcon} className="content-icon" />;
     }
+  };
+
+  rendercert = (record) => {
+    let cert = record.username + '@' + record.host + ':' + record.port;
+    return cert
   }
 
+  renderInterval = (record) => {
+    let interval = '';
+    if (record) {
+      interval = new Date(record);
+    } else {
+      interval = '';
+    }
+    return <TimePicker defaultValue={interval} disabled hasClear={false} size="small" />;
+  }
+
+  renderWorkerType = (record) => {
+    let type = '';
+    if (record === 0) {
+      type = 'INTERVAL';
+    } else if (record === 1) {
+      type = 'CRON';
+    }
+    return type;
+  };
   changePage = (currentPage) => {
-    this.fetchData({
-      page: currentPage - 1,
-    });
+    this.queryCache.page = currentPage - 1;
+    this.fetchData(this.queryCache);
   };
 
   onShowModal = () => {
@@ -233,15 +251,13 @@ export default class EnhanceTable extends Component {
 
   onAddOk = (data) => {
     const that = this;
-    const url = conalogUrl + '/parsers'
+    const url = conalogUrl + '/collectors'
     axios.post(url, data)
       .then((response) => {
         that.setState({
           addVisible: false,
         });
-        that.fetchData({
-          page: 0,
-        });
+        that.fetchData(that.queryCache);
       })
       .catch((error) => {
         this.alert(error);
@@ -255,17 +271,15 @@ export default class EnhanceTable extends Component {
   };
 
   onEditOk = (data) => {
-    let id = this.state.choosedparser._id
+    let id = this.state.choosedCollector._id;
     const that = this;
-    const url = conalogUrl + '/parsers/' + id
+    const url = conalogUrl + '/collectors/' + id
     axios.put(url, data)
       .then((response) => {
         that.setState({
           editVisible: false,
         });
-        that.fetchData({
-          page: 0,
-        });
+        that.fetchData(that.queryCache);
       })
       .catch((error) => {
         this.alert(error);
@@ -278,20 +292,18 @@ export default class EnhanceTable extends Component {
     });
   };
 
-  startParser = (record) => {
+  startInstance = (record) => {
     const that = this;
     const id = record._id;
-    const url = conalogUrl + '/parsers/' + id + '/instances';
+    const url = conalogUrl + '/collectors/instances/' + id;
     const name = record.name;
     Dialog.confirm({
       title: '启动',
       content: '确认启动 ' + name + ' ?',
       onOk: () => {
-        axios.get(url)
+        axios.post(url)
           .then((response) => {
-            that.fetchData({
-              page: 0,
-            });
+            that.fetchData(that.queryCache);
           })
           .catch((error) => {
             this.alert(error);
@@ -302,67 +314,32 @@ export default class EnhanceTable extends Component {
 
   stopInstance = (record) => {
     const that = this;
-    const id = record.parser;
-    const url = conalogUrl + '/parsers/' + id + '/instances'
+    const id = record._id;
+    let name = record.name
+    const url = conalogUrl + '/collectors/instances/' + id
     Dialog.confirm({
       title: '启动',
-      content: '确认停止 ' + id + ' ?',
+      content: '确认停止 ' + name + ' ?',
       onOk: () => {
         axios.delete(url)
           .then((response) => {
-            console.log('hhhhh');
-            that.fetchData({
-              page: 0,
-            });
+            that.fetchData(that.queryCache);
           })
           .catch((error) => {
             this.alert(error);
           });
       },
     });
-  }
-
-  onStartAllParser = () => {
-    const that = this;
-    const url = conalogUrl + '/parsers/instances';
-    Dialog.confirm({
-      title: '启动',
-      content: '确认启动所有parser?',
-      onOk: () => {
-        axios.post(url)
-          .then((response) => {
-            that.fetchData({
-              page: 0,
-            });
-          })
-          .catch((error) => {
-            this.alert(error);
-          });
-      },
-    });
-  }
-  onStopAllParser = () => {
-    const that = this;
-    const url = conalogUrl + '/parsers/instances'
-    Dialog.confirm({
-      title: '启动',
-      content: '确认停止所有parser?',
-      onOk: () => {
-        axios.delete(url)
-          .then((response) => {
-            that.fetchData({
-              page: 0,
-            });
-          })
-          .catch((error) => {
-            this.alert(error);
-          });
-      },
-    });
-  }
+  };
 
   checkLog = (record) => {
 
+  };
+
+  chooseGroup = (value, option) => {
+    this.queryCache.group = value;
+    this.queryCache.page = 0;
+    this.fetchData(this.queryCache);
   };
 
   expandedRowRender = (record) => {
@@ -375,26 +352,8 @@ export default class EnhanceTable extends Component {
       hasBorder={false}
     >
       <Table.Column
-        title="parser"
-        // lock
-        width={230}
-        dataIndex="parser"
-      />
-      <Table.Column
-        title="进程号"
-        dataIndex="status.pid"
-        width={150}
-        cell={(item) => {
-          let pid = '--';
-          if (item) {
-            pid = item;
-          }
-          return pid;
-        }}
-      />
-      <Table.Column
-        title="更新时间"
-        dataIndex="status.uptime"
+        title="时间"
+        dataIndex="ts"
         width={85}
         cell={(item) => {
           let uptime = '--';
@@ -405,32 +364,8 @@ export default class EnhanceTable extends Component {
         }}
       />
       <Table.Column
-        title="重启"
-        dataIndex="status.restart"
-        width={85}
-        cell={(item) => {
-          let restart = '--';
-          if (item) {
-            restart = item;
-          }
-          return restart;
-        }}
-      />
-      <Table.Column
-        title="状态"
-        dataIndex="status.status"
-        width={150}
-        cell={(item) => {
-          let status = '--';
-          if (item) {
-            status = item;
-          }
-          return status;
-        }}
-      />
-      <Table.Column
         title="日志条数"
-        dataIndex="lastActivity.count"
+        dataIndex="count"
         width={150}
         cell={(item) => {
           let count = '--';
@@ -453,15 +388,15 @@ export default class EnhanceTable extends Component {
         }}
       />
       <Table.Column
-        title="日期"
-        dataIndex="lastActivity.date"
+        title="error"
+        dataIndex="error"
         width={150}
         cell={(item) => {
-          let date = '--';
+          let result = '--';
           if (item) {
-            date = moment(item).format('YYYY-MM-DD HH:mm:ss');
+            result = item;
           }
-          return date;
+          return result;
         }}
       />
       <Table.Column
@@ -477,14 +412,15 @@ export default class EnhanceTable extends Component {
   onExpandedChange = (expandedRowKeys, currentRowKey, expanded, currentRecord) => {
     let id = currentRecord._id;
     if (expanded) {
-      this.parserInstances.push(id);
-      this.getparserInstance(id);
+      this.collectorInstances.push(id);
+      this.getcollectorInstance(id);
     } else {
-      this.parserInstances = this.parserInstances.filter(item => item !== id);
+      this.collectorInstances = this.collectorInstances.filter(item => item !== id);
     }
   };
 
   render() {
+    const allgroups = this.state.allgroups;
     const tableData = this.props.bindingData.tableData;
     tableData.list.forEach((item, key) => item.id = key);
     return (
@@ -495,14 +431,11 @@ export default class EnhanceTable extends Component {
               添加采集
             </Button>
           </div>
-          {/* <div>
-            <Button type="primary" onClick={this.onStartAllParser}>
-              启动
-            </Button>
-            <Button type="primary" onClick={this.onStopAllParser}>
-              停止
-            </Button>
-          </div> */}
+          <div>
+            <Select size="large" onChange={this.chooseGroup} placeholder="请选择分组" style={{ width: 200 }}>
+              {allgroups && allgroups.map((item, key) => (<Option key={item.name} value={item._id}>{item.name}</Option>))}
+            </Select>
+          </div>
         </IceContainer>
         <IceContainer>
           <Table
@@ -514,15 +447,48 @@ export default class EnhanceTable extends Component {
             expandedRowRender={this.expandedRowRender}
             onExpandedChange={this.onExpandedChange}
           >
-            {/* <Table.Column
+            <Table.Column
               title="ID"
               // lock
               width={230}
               dataIndex="_id"
-            /> */}
+            />
             <Table.Column
               title="名字"
               dataIndex="name"
+              width={150}
+            />
+            <Table.Column
+              title="cert"
+              dataIndex="cert"
+              width={200}
+              cell={this.rendercert}
+            />
+            <Table.Column
+              title="路径"
+              dataIndex="worker.path"
+              width={150}
+            />
+            <Table.Column
+              title="参数"
+              dataIndex="worker.parameter"
+              width={150}
+            />
+            <Table.Column
+              title="类型"
+              dataIndex="worker.type"
+              width={150}
+              cell={this.renderWorkerType}
+            />
+            <Table.Column
+              title="interval"
+              dataIndex="worker.interval"
+              width={180}
+              cell={this.renderInterval}
+            />
+            <Table.Column
+              title="cron"
+              dataIndex="worker.cron"
               width={150}
             />
             <Table.Column
@@ -540,39 +506,9 @@ export default class EnhanceTable extends Component {
               dataIndex="output.type"
               width={150}
             />
-            {/* <Table.Column
-              title="cert"
-              dataIndex="worker.cert"
-              width={150}
-            /> */}
-            <Table.Column
-              title="路径"
-              dataIndex="worker.path"
-              width={150}
-            />
-            <Table.Column
-              title="参数"
-              dataIndex="worker.path"
-              width={150}
-            />
-            <Table.Column
-              title="类型"
-              dataIndex="worker.path"
-              width={150}
-            />
-            <Table.Column
-              title="interval"
-              dataIndex="worker.interval"
-              width={150}
-            />
-            <Table.Column
-              title="cron"
-              dataIndex="worker.cron"
-              width={150}
-            />
             <Table.Column
               title="分组"
-              dataIndex="category"
+              dataIndex="group.name"
               width={150}
               cell={this.rendergroup}
             />
@@ -610,7 +546,7 @@ export default class EnhanceTable extends Component {
             />
           </div>
         </IceContainer>
-        {this.state.editVisible && <Modal data={this.state.choosedparser} onOk={this.onEditOk} onCancel={this.onEditCancel} />}
+        {this.state.editVisible && <Modal data={this.state.choosedCollector} onOk={this.onEditOk} onCancel={this.onEditCancel} />}
         {this.state.addVisible && <Modal onOk={this.onAddOk} onCancel={this.onAddCancel} />}
       </div>
     );

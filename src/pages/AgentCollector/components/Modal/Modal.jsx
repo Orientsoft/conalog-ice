@@ -5,8 +5,9 @@ import {
   FormBinder as IceFormBinder,
   FormError as IceFormError,
 } from '@icedesign/form-binder';
-import config from '../../../../config';
 import axios from 'axios';
+import config from '../../../../config';
+
 
 const { Item: FormItem } = Form;
 const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toString()
