@@ -223,10 +223,11 @@ export default class EnhanceTable extends Component {
     let interval = '';
     if (record) {
       interval = new Date(record);
+      return <TimePicker value={interval} disabled hasClear={false} size="small" />;
     } else {
       interval = '';
+      return interval;
     }
-    return <TimePicker defaultValue={interval} disabled hasClear={false} size="small" />;
   }
 
   renderWorkerType = (record) => {
