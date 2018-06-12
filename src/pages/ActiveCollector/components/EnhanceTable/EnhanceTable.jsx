@@ -185,7 +185,6 @@ export default class EnhanceTable extends Component {
       </div>
     );
   };
-
   renderStop = (value, index, record) => {
     return (
       <div style={{ lineHeight: '28px' }}>
@@ -195,7 +194,6 @@ export default class EnhanceTable extends Component {
       </div>
     );
   };
-
   renderchannel = (record) => {
     let d = '';
     if (record === 0) {
@@ -205,7 +203,6 @@ export default class EnhanceTable extends Component {
     }
     return d;
   };
-
   renderrunning = (record) => {
     if (!record) {
       return <Icon type="set" />;
@@ -213,12 +210,10 @@ export default class EnhanceTable extends Component {
       return <Icon type="set" style={styles.contentIcon} className="content-icon" />;
     }
   };
-
   rendercert = (record) => {
     let cert = record.username + '@' + record.host + ':' + record.port;
     return cert
   }
-
   renderInterval = (record) => {
     let interval = '';
     if (record) {
@@ -229,7 +224,6 @@ export default class EnhanceTable extends Component {
       return interval;
     }
   }
-
   renderWorkerType = (record) => {
     let type = '';
     if (record === 0) {
@@ -239,6 +233,7 @@ export default class EnhanceTable extends Component {
     }
     return type;
   };
+  
   changePage = (currentPage) => {
     this.queryCache.page = currentPage - 1;
     this.fetchData(this.queryCache);
@@ -506,6 +501,7 @@ export default class EnhanceTable extends Component {
               title="数据输出通道类型"
               dataIndex="output.type"
               width={150}
+              cell={this.renderchannel}
             />
             <Table.Column
               title="分组"

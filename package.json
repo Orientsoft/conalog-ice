@@ -16,6 +16,8 @@
     "@icedesign/menu": "^0.1.0",
     "@icedesign/skin": "^0.1.0",
     "axios": "^0.17.1",
+    "mobx": "^3.1.9",
+    "mobx-react": "^4.1.8",
     "bizcharts": "3.1.0",
     "classnames": "^2.2.5",
     "crypto-js": "^3.1.9-1",

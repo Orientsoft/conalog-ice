@@ -1,14 +1,14 @@
 /* eslint no-underscore-dangle: 0 */
 import React, { Component } from 'react';
-import { Table, Pagination, Tab, Search, Button, Dialog } from '@icedesign/base';
+import { Table, Pagination, Search, Button, Dialog } from '@icedesign/base';
 import IceContainer from '@icedesign/container';
 import DataBinder from '@icedesign/data-binder';
-import IceLabel from '@icedesign/label';
-import { enquireScreen } from 'enquire-js';
-import Modal from '../Modal';
-import config from '../../../../config';
+// import IceLabel from '@icedesign/label';
 import axios from 'axios';
 import moment from 'moment';
+import { observer, inject } from 'mobx-react';
+import Modal from '../Modal';
+import config from '../../../../config';
 
 const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toString()
 
@@ -42,6 +42,9 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
     },
   },
 })
+
+@inject('store')
+@observer
 export default class EnhanceTable extends Component {
   static displayName = 'EnhanceTable';
 
@@ -51,7 +54,6 @@ export default class EnhanceTable extends Component {
 
   constructor(props) {
     super(props);
-
     this.queryCache = {};
     this.state = {
       // activeKey: 'solved',
@@ -81,12 +83,6 @@ export default class EnhanceTable extends Component {
     // this.fetchData();
   }
 
-  // fetchData = () => {
-  //   this.props.updateBindingData('tableData', {
-  //     data: this.queryCache,
-  //   });
-  // };
-
   alert = (error) => {
     Dialog.alert({
       title: 'alert',
@@ -99,14 +95,6 @@ export default class EnhanceTable extends Component {
     this.props.updateBindingData('tableData', {
       params: page,
     });
-  };
-
-  renderTitle = (value, index, record) => {
-    return (
-      <div style={styles.titleWrapper}>
-        <span style={styles.title}>{record.title}</span>
-      </div>
-    );
   };
 
   editItem = (record) => {
@@ -140,7 +128,7 @@ export default class EnhanceTable extends Component {
 
   testConnect = (record) => {
     let id = record._id;
-    const url = conalogUrl + '/certs/' + id + '/test'
+    const url = this.conalogUrl + '/certs/' + id + '/test'
     axios.get(url)
       .then((response) => {
         Dialog.confirm({
@@ -169,7 +157,6 @@ export default class EnhanceTable extends Component {
       </div>
     );
   };
-
   rendergroup = (record) => {
     let d = '';
     this.state.allGroups.filter((item) => {
@@ -180,18 +167,6 @@ export default class EnhanceTable extends Component {
     return d;
   }
 
-  // renderStatus = (value) => {
-  //   return (
-  //     <IceLabel inverse={false} status="default">
-  //       {value}
-  //     </IceLabel>
-  //   );
-  // };
-
-  // changePage = (currentPage) => {
-  //   this.queryCache.page = currentPage;
-  //   this.fetchData();
-  // };
   changePage = (currentPage) => {
     this.fetchData({
       page: currentPage - 1,
@@ -252,6 +227,7 @@ export default class EnhanceTable extends Component {
   };
 
   render() {
+    console.log('props', this.props.store);
     const tableData = this.props.bindingData.tableData;
     return (
       <div className="enhance-table" style={styles.enhanceTable}>
