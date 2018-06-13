@@ -45,7 +45,7 @@ export default class SimpleFormDialog extends Component {
 
   componentWillMount() {
     const url = conalogUrl + '/groups'
-    axios.get(url)
+    axios.get(url, { params: { pageSize: config.MAX_SIZE } })
       .then((response) => {
         this.state.allGroups = response.data.groups;
         this.setState({

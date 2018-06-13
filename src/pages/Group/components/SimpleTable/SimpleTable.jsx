@@ -3,12 +3,10 @@ import { Table, Pagination, Button, Dialog } from '@icedesign/base';
 import IceContainer from '@icedesign/container';
 import IceImg from '@icedesign/img';
 import DataBinder from '@icedesign/data-binder';
-import IceLabel from '@icedesign/label';
-import Modal from '../Modal';
-import { enquireScreen } from 'enquire-js';
-import config from '../../../../config';
 import axios from 'axios';
 import moment from 'moment';
+import Modal from '../Modal';
+import config from '../../../../config';
 
 const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toString()
 
@@ -60,7 +58,6 @@ export default class SimpleTable extends Component {
   }
 
   componentDidMount() {
-    // this.enquireScreenRegister();
     this.fetchData({
       page: 0,
     });
@@ -80,29 +77,6 @@ export default class SimpleTable extends Component {
     });
   };
 
-  renderTitle = (value, index, record) => {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-        }}
-      >
-        <div>
-          <IceImg src={record.cover} width={48} height={48} />
-        </div>
-        <span
-          style={{
-            marginLeft: '10px',
-            lineHeight: '20px',
-          }}
-        >
-          {record.title}
-        </span>
-      </div>
-    );
-  };
-
   renderOperations = (value, index, record) => {
     return (
       <div style={{ lineHeight: '28px' }}>
@@ -115,7 +89,6 @@ export default class SimpleTable extends Component {
       </div>
     );
   };
-
   renderCell = (record) => {
     let d = '';
     if (record === 0) {

@@ -46,7 +46,7 @@ export default class SimpleFormDialog extends Component {
   componentWillMount() {
     const url = conalogUrl + '/certs'
     //获取certs
-    axios.get(url)
+    axios.get(url, { params: { pageSize: config.MAX_SIZE } })
       .then((response) => {
         this.state.allCerts = response.data.certs;
         this.setState({
@@ -62,7 +62,7 @@ export default class SimpleFormDialog extends Component {
       });
     const groupurl = conalogUrl + '/groups'
     //获取分组
-    axios.get(groupurl)
+    axios.get(groupurl, { params: { pageSize: config.MAX_SIZE } })
       .then((response) => {
         this.state.allGroups = response.data.groups;
         this.setState({
@@ -243,9 +243,10 @@ export default class SimpleFormDialog extends Component {
           <FormItem label="输出数据通道名：" {...formItemLayout} hasFeedback >
             <Input
               hasLimitHint
+              placeholder="默认为 pc_名字"
               {...init('outputname', {
                 rules: [
-                  { required: true, trigger: 'onBlur', message: '请填写输出数据通道名' },
+                  // { required: true, trigger: 'onBlur', message: '请填写输出数据通道名' },
                 ],
               })}
             />

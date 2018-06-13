@@ -18,11 +18,10 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
     method: 'get',
     params: {
       category: 0,
-      embed: true,
+      embed: 1,
     },
     responseFormatter: (responseHandler, res, originResponse) => {
       let list = res.collectors;
-      console.log(list)
       list.forEach((item) => {
         const { createdAt, updatedAt } = item;
         item.createdAt = moment(createdAt).format('YYYY-MM-DD HH:mm:ss');
@@ -74,7 +73,7 @@ export default class EnhanceTable extends Component {
 
   componentDidMount() {
     const url = conalogUrl + '/groups'
-    axios.get(url)
+    axios.get(url, { params: { pageSize: config.MAX_SIZE } })
       .then((response) => {
         this.state.allgroups = response.data.groups;
         this.state.allgroups.unshift({ name: '查看所有', _id: '' });
@@ -233,7 +232,7 @@ export default class EnhanceTable extends Component {
     }
     return type;
   };
-  
+
   changePage = (currentPage) => {
     this.queryCache.page = currentPage - 1;
     this.fetchData(this.queryCache);

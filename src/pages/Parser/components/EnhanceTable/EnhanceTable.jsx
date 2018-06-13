@@ -70,7 +70,7 @@ export default class EnhanceTable extends Component {
 
   componentDidMount() {
     const url = conalogUrl + '/groups'
-    axios.get(url)
+    axios.get(url, { params: { pageSize: config.MAX_SIZE } })
       .then((response) => {
         this.state.allGroups = response.data.groups;
         this.state.allGroups.unshift({ name: '查看所有', _id: '' });
@@ -176,7 +176,6 @@ export default class EnhanceTable extends Component {
       </div>
     );
   };
-
   renderStop = (value, index, record) => {
     return (
       <div style={{ lineHeight: '28px' }}>
@@ -185,8 +184,7 @@ export default class EnhanceTable extends Component {
         </a>
       </div>
     );
-  }
-
+  };
   rendergroup = (record) => {
     let d = '';
     this.state.allGroups.filter((item) => {
@@ -195,8 +193,7 @@ export default class EnhanceTable extends Component {
       }
     });
     return d;
-  }
-
+  };
   renderchannel = (record) => {
     let d = '';
     if (record === 0) {
@@ -205,19 +202,17 @@ export default class EnhanceTable extends Component {
       d = 'NSQ_QUEUE';
     }
     return d;
-  }
-
+  };
   renderrunning = (record) => {
     if (!record) {
       return <Icon type="set" />;
     } else {
       return <Icon type="set" style={styles.contentIcon} className="content-icon" />;
     }
-  }
+  };
 
   changePage = (currentPage) => {
     this.queryCache.page = currentPage - 1;
-    console.log('page', this.queryCache);
     this.fetchData(this.queryCache);
   };
 
@@ -249,9 +244,9 @@ export default class EnhanceTable extends Component {
   };
 
   onEditOk = (data) => {
-    let id = this.state.choosedparser._id;
+    const id = this.state.choosedparser._id;
     const that = this;
-    const url = conalogUrl + '/parsers/' + id
+    const url = conalogUrl + '/parsers/' + id;
     axios.put(url, data)
       .then((response) => {
         that.setState({
@@ -293,14 +288,13 @@ export default class EnhanceTable extends Component {
   stopInstance = (record) => {
     const that = this;
     const id = record.parser;
-    const url = conalogUrl + '/parsers/' + id + '/instances'
+    const url = conalogUrl + '/parsers/' + id + '/instances';
     Dialog.confirm({
       title: '启动',
       content: '确认停止 ' + id + ' ?',
       onOk: () => {
         axios.delete(url)
           .then((response) => {
-            console.log('hhhhh');
             that.fetchData(that.queryCache);
           })
           .catch((error) => {
@@ -356,8 +350,8 @@ export default class EnhanceTable extends Component {
   };
 
   expandedRowRender = (record) => {
-    let allInstances = this.state.allInstances;
-    let data = allInstances.filter(item => item.parser === record._id) ? allInstances.filter(item => item.parser === record._id) : [];
+    const allInstances = this.state.allInstances;
+    const data = allInstances.filter(item => item.parser === record._id) ? allInstances.filter(item => item.parser === record._id) : [];
     return (<Table
       dataSource={data}
       className="basic-table"
@@ -385,7 +379,7 @@ export default class EnhanceTable extends Component {
       <Table.Column
         title="更新时间"
         dataIndex="status.uptime"
-        width={85}
+        width={150}
         cell={(item) => {
           let uptime = '--';
           if (item) {
@@ -397,7 +391,7 @@ export default class EnhanceTable extends Component {
       <Table.Column
         title="重启"
         dataIndex="status.restart"
-        width={85}
+        width={50}
         cell={(item) => {
           let restart = '--';
           if (item) {
@@ -461,7 +455,7 @@ export default class EnhanceTable extends Component {
         cell={this.renderStop}
       />
     </Table>
-    )
+    );
   };
 
   onExpandedChange = (expandedRowKeys, currentRowKey, expanded, currentRecord) => {

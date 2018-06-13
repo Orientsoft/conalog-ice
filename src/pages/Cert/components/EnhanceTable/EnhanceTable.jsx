@@ -1,6 +1,6 @@
 /* eslint no-underscore-dangle: 0 */
 import React, { Component } from 'react';
-import { Table, Pagination, Search, Button, Dialog } from '@icedesign/base';
+import { Table, Pagination, Search, Button, Dialog, Select } from '@icedesign/base';
 import IceContainer from '@icedesign/container';
 import DataBinder from '@icedesign/data-binder';
 // import IceLabel from '@icedesign/label';
@@ -54,7 +54,10 @@ export default class EnhanceTable extends Component {
 
   constructor(props) {
     super(props);
-    this.queryCache = {};
+    this.queryCache = {
+      group: '',
+      page: 0,
+    };
     this.state = {
       // activeKey: 'solved',
       addVisible: false,
@@ -66,9 +69,10 @@ export default class EnhanceTable extends Component {
 
   componentDidMount() {
     const url = conalogUrl + '/groups'
-    axios.get(url)
+    axios.get(url, { params: { pageSize: config.MAX_SIZE } })
       .then((response) => {
         this.state.allGroups = response.data.groups;
+        this.state.allGroups.unshift({ name: '查看所有', _id: '' });
         this.setState({
           allGroups: this.state.allGroups,
         });
@@ -76,11 +80,8 @@ export default class EnhanceTable extends Component {
       .catch((error) => {
         this.alert(error);
       });
-    // this.queryCache.page = 1;
-    this.fetchData({
-      page: 0,
-    });
-    // this.fetchData();
+
+    this.fetchData(this.queryCache);
   }
 
   alert = (error) => {
@@ -91,9 +92,9 @@ export default class EnhanceTable extends Component {
     });
   }
 
-  fetchData = (page) => {
+  fetchData = (params) => {
     this.props.updateBindingData('tableData', {
-      params: page,
+      params,
     });
   };
 
@@ -115,9 +116,7 @@ export default class EnhanceTable extends Component {
         const url = conalogUrl + '/certs/' + id
         axios.delete(url)
           .then((response) => {
-            that.fetchData({
-              page: 0,
-            });
+            that.fetchData(this.queryCache);
           })
           .catch((error) => {
             this.alert(error);
@@ -128,7 +127,7 @@ export default class EnhanceTable extends Component {
 
   testConnect = (record) => {
     let id = record._id;
-    const url = this.conalogUrl + '/certs/' + id + '/test'
+    const url = conalogUrl + '/certs/' + id + '/test'
     axios.get(url)
       .then((response) => {
         Dialog.confirm({
@@ -168,9 +167,8 @@ export default class EnhanceTable extends Component {
   }
 
   changePage = (currentPage) => {
-    this.fetchData({
-      page: currentPage - 1,
-    });
+    this.queryCache.page = currentPage - 1;
+    this.fetchData(this.queryCache);
   };
 
   onShowModal = () => {
@@ -187,9 +185,7 @@ export default class EnhanceTable extends Component {
         this.setState({
           addVisible: false,
         });
-        that.fetchData({
-          page: 0,
-        });
+        that.fetchData(this.queryCache);
       })
       .catch((error) => {
         this.alert(error);
@@ -211,9 +207,7 @@ export default class EnhanceTable extends Component {
         that.setState({
           editVisible: false,
         });
-        that.fetchData({
-          page: 0,
-        });
+        that.fetchData(this.queryCache);
       })
       .catch((error) => {
         this.alert(error);
@@ -226,8 +220,15 @@ export default class EnhanceTable extends Component {
     });
   };
 
+  chooseGroup = (value, option) => {
+    this.queryCache.group = value;
+    this.queryCache.page = 0;
+    this.fetchData(this.queryCache);
+  }
+
   render() {
     console.log('props', this.props.store);
+    const allgroups = this.state.allGroups;
     const tableData = this.props.bindingData.tableData;
     return (
       <div className="enhance-table" style={styles.enhanceTable}>
@@ -237,16 +238,11 @@ export default class EnhanceTable extends Component {
               添加认证
             </Button>
           </div>
-          {/* <div style={styles.extraFilter}>
-            <Search
-              style={styles.search}
-              type="primary"
-              inputWidth={150}
-              placeholder="搜索"
-              searchText=""
-              onSearch={this.onSearch}
-            />
-          </div> */}
+          <div>
+            <Select size="large" onChange={this.chooseGroup} placeholder="请选择分组" style={{ width: 200 }}>
+              {allgroups && allgroups.map((item, key) => (<Option key={item.name} value={item._id}>{item.name}</Option>))}
+            </Select>
+          </div>
         </IceContainer>
         <IceContainer>
           <Table

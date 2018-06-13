@@ -49,7 +49,7 @@ export default class SimpleFormDialog extends Component {
   componentWillMount() {
     const url = conalogUrl + '/groups'
     //获取分组
-    axios.get(url)
+    axios.get(url, { params: { pageSize: config.MAX_SIZE } })
       .then((response) => {
         this.state.allGroups = response.data.groups;
         this.setState({
@@ -124,6 +124,7 @@ export default class SimpleFormDialog extends Component {
         parameter: values.parameter || '',
         group: values.group,
       };
+      console.log(data)
       this.props.onOk(data);
     });
   };
@@ -239,9 +240,10 @@ export default class SimpleFormDialog extends Component {
           <FormItem label="输出数据通道名：" {...formItemLayout} hasFeedback >
             <Input
               hasLimitHint
+              placeholder="默认为 p_名字"
               {...init('outputname', {
                 rules: [
-                  { required: true, trigger: 'onBlur', message: '请填写输出数据通道名' },
+                  // { required: true, trigger: 'onBlur', message: '请填写输出数据通道名' },
                 ],
               })}
             />
