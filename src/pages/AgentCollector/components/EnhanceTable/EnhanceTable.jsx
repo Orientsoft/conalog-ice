@@ -179,7 +179,6 @@ export default class EnhanceTable extends Component {
       </div>
     );
   };
-
   renderStop = (value, index, record) => {
     return (
       <div style={{ lineHeight: '28px' }}>
@@ -189,7 +188,6 @@ export default class EnhanceTable extends Component {
       </div>
     );
   }
-
   renderchannel = (record) => {
     let d = '';
     if (record === 0) {
@@ -199,7 +197,6 @@ export default class EnhanceTable extends Component {
     }
     return d;
   }
-
   renderrunning = (record) => {
     if (!record) {
       return <Icon type="set" />;
@@ -207,12 +204,10 @@ export default class EnhanceTable extends Component {
       return <Icon type="set" style={styles.contentIcon} className="content-icon" />;
     }
   }
-
   rendercert = (record) => {
     let cert = record.username + '@' + record.host + ':' + record.port;
     return cert
   }
-
   rendertype = (record) => {
     let type = '';
     if (record === 0) {
@@ -326,8 +321,8 @@ export default class EnhanceTable extends Component {
   }
 
   expandedRowRender = (record) => {
-    let allInstances = this.state.allInstances;
-    let data = allInstances.filter(item => item.parser === record._id) ? allInstances.filter(item => item.parser === record._id) : [];
+    const allInstances = this.state.allInstances;
+    const data = allInstances.filter(item => item._id === record._id) ? allInstances.filter(item => item._id === record._id) : [];
     return (<Table
       dataSource={data}
       className="basic-table"

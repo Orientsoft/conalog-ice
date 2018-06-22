@@ -339,7 +339,7 @@ export default class EnhanceTable extends Component {
 
   expandedRowRender = (record) => {
     let allInstances = this.state.allInstances;
-    let data = allInstances.filter(item => item.parser === record._id) ? allInstances.filter(item => item.parser === record._id) : [];
+    let data = allInstances.filter(item => item._id === record._id) ? allInstances.filter(item => item._id === record._id) : [];
     return (<Table
       dataSource={data}
       className="basic-table"
@@ -454,7 +454,7 @@ export default class EnhanceTable extends Component {
               width={150}
             />
             <Table.Column
-              title="cert"
+              title="认证"
               dataIndex="cert"
               width={200}
               cell={this.rendercert}

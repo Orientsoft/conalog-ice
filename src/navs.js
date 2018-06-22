@@ -3,7 +3,6 @@ const autoGenHeaderNavs = [];
 const autoGenAsideNavs = [
   { text: '主页', to: '/home', icon: 'home' },
   { text: '认证', to: '/cert', icon: 'yonghu' },
-  // { text: '采集', to: '/collector', icon: 'copy' },
   {
     text: '采集',
     to: '/collector',
@@ -16,7 +15,7 @@ const autoGenAsideNavs = [
   },
   { text: '解析', to: '/parser', icon: 'pin' },
   { text: '用户', to: '/user', icon: 'yonghu' },
-  { text: '分组', to: '/group', icon: 'yonghu' },
+  { text: '分组', to: '/group', icon: 'cascades' },
 ];
 
 // <!-- auto generated navs end -->

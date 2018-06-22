@@ -67,7 +67,7 @@ export default class UserLogin extends Component {
         .catch((error) => {
           Dialog.confirm({
             title: '测试',
-            content: error.response.data.message,
+            // content: error.response.data.message ? error.response.data.message : error.response.data,
             onOk: () => { },
           });
           // Message.error(error)
