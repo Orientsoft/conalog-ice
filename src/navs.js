@@ -2,7 +2,7 @@
 const autoGenHeaderNavs = [];
 const autoGenAsideNavs = [
   { text: '主页', to: '/home', icon: 'home' },
-  { text: '认证', to: '/cert', icon: 'yonghu' },
+  { text: '认证', to: '/cert', icon: 'shezhi' },
   {
     text: '采集',
     to: '/collector',
