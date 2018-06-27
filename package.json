@@ -48,7 +48,7 @@
     "ice-scripts": "^1.6.0-0"
   },
   "scripts": {
-    "start": "PORT=9527 ice dev",
+    "start": "PORT=3333 ice dev",
     "build": "ice build",
     "lint": "eslint . --ext '.js,.jsx' --fix"
   },

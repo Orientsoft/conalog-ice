@@ -270,7 +270,7 @@ export default class EnhanceTable extends Component {
   startInstance = (record) => {
     const that = this;
     const id = record._id;
-    const url = conalogUrl + '/collectors/instances/' + id;
+    const url = conalogUrl + '/collectors/' + id + '/instances';
     const name = record.name;
     Dialog.confirm({
       title: '启动',
@@ -286,12 +286,11 @@ export default class EnhanceTable extends Component {
       },
     });
   };
-
   stopInstance = (record) => {
     const that = this;
     const id = record._id;
     let name = record.name
-    const url = conalogUrl + '/collectors/instances/' + id
+    const url = conalogUrl + '/collectors/' + id + '/instances';
     Dialog.confirm({
       title: '启动',
       content: '确认停止 ' + name + ' ?',
@@ -305,7 +304,43 @@ export default class EnhanceTable extends Component {
           });
       },
     });
-  }
+  };
+  onStartAllCollector = () => {
+    const that = this;
+    const params = { category: 1, group: this.queryCache.group };
+    const url = conalogUrl + '/collectors/instances';
+    Dialog.confirm({
+      title: '启动',
+      content: '确认启动所有collector?',
+      onOk: () => {
+        axios.post(url, params)
+          .then((response) => {
+            that.fetchData(that.queryCache);
+          })
+          .catch((error) => {
+            this.alert(error);
+          });
+      },
+    });
+  };
+  onStopAllCollector = () => {
+    const that = this;
+    const params = { category: 1, group: this.queryCache.group };
+    const url = conalogUrl + '/collectors/instances'
+    Dialog.confirm({
+      title: '启动',
+      content: '确认停止所有collector?',
+      onOk: () => {
+        axios.delete(url, params)
+          .then((response) => {
+            that.fetchData(that.queryCache);
+          })
+          .catch((error) => {
+            this.alert(error);
+          });
+      },
+    });
+  };
 
   checkLog = (record) => {
 
@@ -404,6 +439,12 @@ export default class EnhanceTable extends Component {
           <div>
             <Button type="primary" onClick={this.onShowModal}>
               添加采集
+            </Button>
+            <Button type="primary" onClick={this.onStartAllCollector}>
+              启动
+            </Button>
+            <Button type="primary" onClick={this.onStopAllCollector}>
+              停止
             </Button>
           </div>
           <div>
