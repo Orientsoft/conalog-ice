@@ -66,26 +66,26 @@ export default class EnhanceTable extends Component {
       addVisible: false,
       editVisible: false,
       choosedcert: {},
-      allGroups: [],
+      // allGroups: [],
     };
   }
 
   componentDidMount() {
-    const url = conalogUrl + '/groups'
-    axios.get(url, { params: { pageSize: config.MAX_SIZE } })
-      .then((response) => {
-        this.state.allGroups = response.data.groups.filter(item => item.type === 0);
-        // this.state.allGroups = response.data.groups;
-        this.state.allGroups.unshift({ name: '查看所有', _id: '' });
-        this.setState({
-          allGroups: this.state.allGroups,
-        });
-      })
-      .catch((error) => {
-        this.alert(error);
-      });
-
+    this.props.store.fetchGroup({ params: { pageSize: config.MAX_SIZE } }, { grouptype: 0 });
     this.fetchData(this.queryCache);
+    // const url = conalogUrl + '/groups'
+    // axios.get(url, { params: { pageSize: config.MAX_SIZE } })
+    //   .then((response) => {
+    //     this.state.allGroups = response.data.groups.filter(item => item.type === 0);
+    //     // this.state.allGroups = response.data.groups;
+    //     this.state.allGroups.unshift({ name: '查看所有', _id: '' });
+    //     this.setState({
+    //       allGroups: this.state.allGroups,
+    //     });
+    //   })
+    //   .catch((error) => {
+    //     this.alert(error);
+    //   });
   }
 
   alert = (error) => {
@@ -222,8 +222,8 @@ export default class EnhanceTable extends Component {
   }
 
   render() {
-    console.log('props', this.props.store);
-    const allgroups = this.state.allGroups;
+    const allgroups = this.props.store.allGroups.slice();
+    // const allgroups = this.state.allGroups;
     const tableData = this.props.bindingData.tableData;
     return (
       <div className="enhance-table" style={styles.enhanceTable}>

@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { Dialog, Input, Field, Select, Form, TimePicker } from '@icedesign/base';
+import { Dialog, Input, Field, Select, Form } from '@icedesign/base';
 import {
   FormBinderWrapper as IceFormBinderWrapper,
   FormBinder as IceFormBinder,
   FormError as IceFormError,
 } from '@icedesign/form-binder';
 import axios from 'axios';
+import { observer, inject } from 'mobx-react';
 import config from '../../../../config';
 
 
@@ -29,7 +30,8 @@ const defaultValue = {
   },
   group: '',
 };
-
+@inject('store')
+@observer
 export default class SimpleFormDialog extends Component {
   static displayName = 'SimpleFormDialog';
 
@@ -39,45 +41,14 @@ export default class SimpleFormDialog extends Component {
     this.state = {
       value: this.props.data || defaultValue,
       title: this.props.data ? '修改' : '添加',
-      allCerts: [],
-      allGroups: [],
     };
   }
 
   componentWillMount() {
-    const url = conalogUrl + '/certs'
-    //获取certs
-    axios.get(url, { params: { pageSize: config.MAX_SIZE } })
-      .then((response) => {
-        this.state.allCerts = response.data.certs;
-        this.setState({
-          allCerts: this.state.allCerts,
-        });
-      })
-      .catch((error) => {
-        Dialog.alert({
-          title: 'alert',
-          content: error.response.data.message ? error.response.data.message : error.response.data,
-          onOk: () => { },
-        });
-      });
-    const groupurl = conalogUrl + '/groups'
-    //获取分组
-    axios.get(groupurl, { params: { pageSize: config.MAX_SIZE } })
-      .then((response) => {
-        this.state.allGroups = response.data.groups.filter(item => item.type === 1);
-       // this.state.allGroups = response.data.groups;
-        this.setState({
-          allGroups: this.state.allGroups,
-        });
-      })
-      .catch((error) => {
-        Dialog.alert({
-          title: 'alert',
-          content: error.response.data.message ? error.response.data.message : error.response.data,
-          onOk: () => { },
-        });
-      });
+    // 获取certs
+    this.props.store.fetchCerts({ params: { pageSize: config.MAX_SIZE } });
+    // 获取分组
+    this.props.store.fetchGroup({ params: { pageSize: config.MAX_SIZE } }, { grouptype: 1 });
     const value = this.state.value;
     // 编辑时初始化form
     this.field.setValues({
@@ -126,7 +97,9 @@ export default class SimpleFormDialog extends Component {
   };
 
   render() {
-    const { allCerts, allGroups } = this.state;
+    const allGroups = this.props.store.allGroups.slice();
+    allGroups.shift();
+    const allCerts = this.props.store.allCerts.slice();
     const simpleFormDialog = {
       ...styles.simpleFormDialog,
     };

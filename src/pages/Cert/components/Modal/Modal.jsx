@@ -6,13 +6,10 @@ import {
   FormBinder as IceFormBinder,
   FormError as IceFormError,
 } from '@icedesign/form-binder';
-import { enquireScreen } from 'enquire-js';
+import { observer, inject } from 'mobx-react';
 import config from '../../../../config';
-import axios from 'axios';
-import CryptoJS from 'crypto-js';
 
 const { Item: FormItem } = Form;
-const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toString()
 
 
 const defaultValue = {
@@ -25,6 +22,8 @@ const defaultValue = {
   group: '',
 };
 
+@inject('store')
+@observer
 export default class SimpleFormDialog extends Component {
   static displayName = 'SimpleFormDialog';
 
@@ -43,19 +42,7 @@ export default class SimpleFormDialog extends Component {
   }
 
   componentWillMount() {
-    const url = conalogUrl + '/groups'
-    axios.get(url, { params: { pageSize: config.MAX_SIZE } })
-      .then((response) => {
-        this.state.allGroups = response.data.groups.filter(item => item.type === 0);
-        // this.state.allGroups = response.data.groups;
-        this.setState({
-          allGroups: this.state.allGroups,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        // Message.error(error)
-      });
+    this.props.store.fetchGroup({ params: { pageSize: config.MAX_SIZE } }, { grouptype: 0 });
     const value = this.state.value;
     // 编辑时初始化form
     this.field.setValues({
@@ -126,7 +113,8 @@ export default class SimpleFormDialog extends Component {
   };
 
   render() {
-    const allgroups = this.state.allGroups;
+    const allgroups = this.props.store.allGroups.slice();
+    allgroups.shift();
     const { require, disable } = this.state.keyorpass;
     const requirekey = !require;
 

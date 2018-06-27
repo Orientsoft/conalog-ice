@@ -131,6 +131,7 @@ export default class SimpleFormDialog extends Component {
 
   render() {
     const allgroups = this.state.allGroups;
+    allgroups.shift();
     const scripts = this.state.scripts;
     const simpleFormDialog = {
       ...styles.simpleFormDialog,

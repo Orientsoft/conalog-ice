@@ -5,6 +5,7 @@ import IceContainer from '@icedesign/container';
 import DataBinder from '@icedesign/data-binder';
 import axios from 'axios';
 import moment from 'moment';
+import { observer, inject } from 'mobx-react';
 import Modal from '../Modal';
 import config from '../../../../config';
 import './EnhanceTable.scss';
@@ -46,6 +47,8 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
     },
   },
 })
+@inject('store')
+@observer
 export default class EnhanceTable extends Component {
   static displayName = 'EnhanceTable';
 
@@ -62,29 +65,15 @@ export default class EnhanceTable extends Component {
     };
     this.collectorInstances = [];
     this.state = {
-      // activeKey: 'solved',
       addVisible: false,
       editVisible: false,
       choosedCollector: {},
       allInstances: [],
-      allgroups: [],
     };
   }
 
   componentDidMount() {
-    const url = conalogUrl + '/groups'
-    axios.get(url, { params: { pageSize: config.MAX_SIZE } })
-      .then((response) => {
-        this.state.allgroups = response.data.groups.filter(item => item.type === 1);
-        // this.state.allgroups = response.data.groups;
-        this.state.allgroups.unshift({ name: '查看所有', _id: '' });
-        this.setState({
-          allgroups: this.state.allgroups,
-        });
-      })
-      .catch((error) => {
-        this.alert(error);
-      });
+    this.props.store.fetchGroup({ params: { pageSize: config.MAX_SIZE } }, { grouptype: 1 });
     this.fetchData(this.queryCache);
     // 获取collector实例
     this.loop = setInterval(() => this.collectorInstances.forEach(id => this.getcollectorInstance(id)), 5000);
@@ -431,7 +420,7 @@ export default class EnhanceTable extends Component {
   };
 
   render() {
-    const allgroups = this.state.allgroups;
+    const allgroups = this.props.store.allGroups.slice();
     const tableData = this.props.bindingData.tableData;
     tableData.list.forEach((item, key) => item.id = key);
     return (
