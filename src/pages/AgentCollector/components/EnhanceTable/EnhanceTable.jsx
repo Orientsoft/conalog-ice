@@ -93,7 +93,7 @@ export default class EnhanceTable extends Component {
 
   getcollectorInstance = (id) => {
     const that = this;
-    const url = conalogUrl + '/collectors/' + id + '/instances';
+    const url = conalogUrl + '/collectors/instances/' + id ;
     axios.get(url)
       .then((response) => {
         this.dealInstance(response.data);
@@ -264,7 +264,7 @@ export default class EnhanceTable extends Component {
   startInstance = (record) => {
     const that = this;
     const id = record._id;
-    const url = conalogUrl + '/collectors/' + id + '/instances';
+    const url = conalogUrl + '/collectors/instances/' + id ;
     const name = record.name;
     Dialog.confirm({
       title: '启动',
@@ -284,7 +284,7 @@ export default class EnhanceTable extends Component {
     const that = this;
     const id = record._id;
     let name = record.name
-    const url = conalogUrl + '/collectors/' + id + '/instances';
+    const url = conalogUrl + '/collectors/instances/' + id ;
     Dialog.confirm({
       title: '启动',
       content: '确认停止 ' + name + ' ?',
