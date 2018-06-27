@@ -75,7 +75,8 @@ export default class EnhanceTable extends Component {
     const url = conalogUrl + '/groups'
     axios.get(url, { params: { pageSize: config.MAX_SIZE } })
       .then((response) => {
-        this.state.allgroups = response.data.groups;
+        this.state.allgroups = response.data.groups.filter(item => item.type === 1);
+        // this.state.allgroups = response.data.groups;
         this.state.allgroups.unshift({ name: '查看所有', _id: '' });
         this.setState({
           allgroups: this.state.allgroups,

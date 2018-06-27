@@ -34,7 +34,6 @@ export default class SimpleFormDialog extends Component {
     this.state = {
       value: this.props.data || defaultValue,
       title: this.props.data ? '修改' : '添加',
-      // isMobile: false,
       allGroups: [],
       keyorpass: {
         require: true,
@@ -47,7 +46,8 @@ export default class SimpleFormDialog extends Component {
     const url = conalogUrl + '/groups'
     axios.get(url, { params: { pageSize: config.MAX_SIZE } })
       .then((response) => {
-        this.state.allGroups = response.data.groups;
+        this.state.allGroups = response.data.groups.filter(item => item.type === 0);
+        // this.state.allGroups = response.data.groups;
         this.setState({
           allGroups: this.state.allGroups,
         });
@@ -66,7 +66,7 @@ export default class SimpleFormDialog extends Component {
       password: value.password,
       // password: CryptoJS.AES.decrypt(value.password, 'VAULT_BOY').toString(CryptoJS.enc.Utf8),
       key: value.key,
-      group: value.group,
+      group: value.group._id,
     });
     if (value.type === 0) {
       this.state.keyorpass.require = true;

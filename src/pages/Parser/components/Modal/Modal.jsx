@@ -51,7 +51,8 @@ export default class SimpleFormDialog extends Component {
     //获取分组
     axios.get(url, { params: { pageSize: config.MAX_SIZE } })
       .then((response) => {
-        this.state.allGroups = response.data.groups;
+        this.state.allGroups = response.data.groups.filter(item => item.type === 2);
+        // this.state.allGroups = response.data.groups;
         this.setState({
           allGroups: this.state.allGroups,
         });
@@ -89,7 +90,8 @@ export default class SimpleFormDialog extends Component {
       outputtype: value.output.type,
       outputname: value.output.name,
       parameter: value.parameter,
-      group: value.group,
+      group: value.group._id,
+      // group: value.group,
     });
   }
 
@@ -124,7 +126,6 @@ export default class SimpleFormDialog extends Component {
         parameter: values.parameter || '',
         group: values.group,
       };
-      console.log(data)
       this.props.onOk(data);
     });
   };

@@ -16,6 +16,9 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
   tableData: {
     url: conalogUrl + '/certs',
     method: 'get',
+    params: {
+      embed: 1,
+    },
     responseFormatter: (responseHandler, res, originResponse) => {
       let list = res.certs;
       list.forEach((item) => {
@@ -71,7 +74,8 @@ export default class EnhanceTable extends Component {
     const url = conalogUrl + '/groups'
     axios.get(url, { params: { pageSize: config.MAX_SIZE } })
       .then((response) => {
-        this.state.allGroups = response.data.groups;
+        this.state.allGroups = response.data.groups.filter(item => item.type === 0);
+        // this.state.allGroups = response.data.groups;
         this.state.allGroups.unshift({ name: '查看所有', _id: '' });
         this.setState({
           allGroups: this.state.allGroups,
@@ -156,15 +160,6 @@ export default class EnhanceTable extends Component {
       </div>
     );
   };
-  rendergroup = (record) => {
-    let d = '';
-    this.state.allGroups.filter((item) => {
-      if (item._id === record) {
-        d = item.name;
-      }
-    });
-    return d;
-  }
 
   changePage = (currentPage) => {
     this.queryCache.page = currentPage - 1;
@@ -277,9 +272,8 @@ export default class EnhanceTable extends Component {
             />
             <Table.Column
               title="分组"
-              dataIndex="group"
+              dataIndex="group.name"
               width={150}
-              cell={this.rendergroup}
             />
             <Table.Column
               title="创建"

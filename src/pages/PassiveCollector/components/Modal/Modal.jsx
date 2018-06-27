@@ -64,7 +64,8 @@ export default class SimpleFormDialog extends Component {
     //获取分组
     axios.get(groupurl, { params: { pageSize: config.MAX_SIZE } })
       .then((response) => {
-        this.state.allGroups = response.data.groups;
+        this.state.allGroups = response.data.groups.filter(item => item.type === 1);
+        // this.state.allGroups = response.data.groups;
         this.setState({
           allGroups: this.state.allGroups,
         });
