@@ -6,7 +6,7 @@ import {
   FormBinder as IceFormBinder,
   FormError as IceFormError,
 } from '@icedesign/form-binder';
-import { enquireScreen } from 'enquire-js';
+import { observer, inject } from 'mobx-react';
 import config from '../../../../config';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
@@ -31,6 +31,8 @@ const defaultValue = {
   group: '', // 分组
 };
 
+@inject('store')
+@observer
 export default class SimpleFormDialog extends Component {
   static displayName = 'SimpleFormDialog';
 
@@ -40,29 +42,13 @@ export default class SimpleFormDialog extends Component {
     this.state = {
       value: this.props.data || defaultValue,
       title: this.props.data ? '修改' : '添加',
-      // isMobile: false,
-      allGroups: [],
       scripts: [],
     };
   }
 
   componentWillMount() {
-    const url = conalogUrl + '/groups'
-    //获取分组
-    axios.get(url, { params: { pageSize: config.MAX_SIZE } })
-      .then((response) => {
-        this.state.allGroups = response.data.groups.filter(item => item.type === 2);
-        this.setState({
-          allGroups: this.state.allGroups,
-        });
-      })
-      .catch((error) => {
-        Dialog.alert({
-          title: 'alert',
-          content: error.response.data.message ? error.response.data.message : error.response.data,
-          onOk: () => { },
-        });
-      });
+    // 获取分组
+    this.props.store.fetchGroup({ params: { pageSize: config.MAX_SIZE } }, { grouptype: 2 });
     // 获取脚本
     const urlscript = conalogUrl + '/parsers/scripts';
     axios.get(urlscript)
@@ -90,7 +76,6 @@ export default class SimpleFormDialog extends Component {
       outputname: value.output.name,
       parameter: value.parameter,
       group: value.group._id,
-      // group: value.group,
     });
   }
 
@@ -130,7 +115,7 @@ export default class SimpleFormDialog extends Component {
   };
 
   render() {
-    const allgroups = this.state.allGroups;
+    const allgroups = this.props.store.allGroups.slice();
     allgroups.shift();
     const scripts = this.state.scripts;
     const simpleFormDialog = {

@@ -7,6 +7,7 @@ import axios from 'axios';
 import moment from 'moment';
 import './EnhanceTable.scss';
 import Modal from '../Modal';
+import { observer, inject } from 'mobx-react';
 import config from '../../../../config';
 
 
@@ -46,6 +47,9 @@ const conalogUrl = 'http://' + config.conalogHost + ':' + config.conalogPort.toS
     },
   },
 })
+
+@inject('store')
+@observer
 export default class EnhanceTable extends Component {
   static displayName = 'EnhanceTable';
 
@@ -66,25 +70,13 @@ export default class EnhanceTable extends Component {
       addVisible: false,
       editVisible: false,
       choosedparser: {},
-      allGroups: [],
       allInstances: [],
     };
   }
 
   componentDidMount() {
-    const url = conalogUrl + '/groups'
-    axios.get(url, { params: { pageSize: config.MAX_SIZE } })
-      .then((response) => {
-        this.state.allGroups = response.data.groups.filter(item => item.type === 2);
-        // this.state.allGroups = response.data.groups;
-        this.state.allGroups.unshift({ name: '查看所有', _id: '' });
-        this.setState({
-          allGroups: this.state.allGroups,
-        });
-      })
-      .catch((error) => {
-        this.alert(error);
-      });
+    // 获取分组
+    this.props.store.fetchGroup({ params: { pageSize: config.MAX_SIZE } }, { grouptype: 2 });
     this.fetchData(this.queryCache);
     // 获取parser实例
     this.loop = setInterval(() => this.parserInstances.forEach(id => this.getparserInstance(id)), 3000);
@@ -464,7 +456,7 @@ export default class EnhanceTable extends Component {
   };
 
   render() {
-    const allgroups = this.state.allGroups;
+    const allgroups = this.props.store.allGroups.slice();
     const tableData = this.props.bindingData.tableData;
     tableData.list.forEach((item, key) => item.id = key);
     return (
